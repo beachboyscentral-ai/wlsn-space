@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WLSN | Western Light and Sound Network</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--crt-green:#28d428;--crt-dim:#0d5a0d;--crt-bg:#0d120d;--crt-glow:rgba(40,212,40,0.5);--mono:'Courier New',monospace}
+body{font-family:var(--mono);background:var(--crt-bg);color:var(--crt-green);line-height:1.6;font-size:13px;text-shadow:0 0 3px var(--crt-glow)}
+body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,rgba(0,0,0,0.15) 0px,rgba(0,0,0,0.15) 1px,transparent 1px,transparent 2px);pointer-events:none;z-index:9999}
+.container{max-width:1000px;margin:0 auto;padding:40px 20px}
+header{border-top:2px solid var(--crt-green);border-bottom:2px solid var(--crt-green);padding:20px 0;margin-bottom:50px}
+.logo{font-size:36px;font-weight:700;letter-spacing:12px;margin-bottom:10px;text-shadow:0 0 8px var(--crt-glow);line-height:1.2}
+.logo .cursor{font-size:24px;line-height:1;display:inline-block;vertical-align:baseline;margin-left:8px;animation:blink 1s infinite;position:relative;top: -6px}
+.tagline{font-size:11px;letter-spacing:2px;color:#4a9a4a;text-transform:uppercase;opacity:0.7}
+nav{margin-top:18px;padding-top:18px;border-top:1px solid var(--crt-dim);display:flex;flex-wrap:wrap;gap:0;font-size:10px;text-transform:uppercase;letter-spacing:1px}
+nav a{color:var(--crt-green);text-decoration:none;padding:4px 20px;border-right:1px solid var(--crt-dim);opacity:0.7}
+nav a:visited{color:var(--crt-green)}
+nav a:first-child{padding-left:0}
+nav a:hover,nav a.active{opacity:1;color:#fff;text-shadow:0 0 10px var(--crt-glow);background:rgba(40,212,40,0.1)}
+.stamp{display:inline-block;border:3px double #8b2e2e;color:#8b2e2e;padding:6px 14px;font-size:11px;letter-spacing:3px;font-weight:700;margin:20px 0;background:rgba(139,46,46,0.03)}
+.intro{border:1px solid var(--crt-dim);border-left:4px solid var(--crt-green);padding:30px;margin-bottom:40px}
+.intro h1{font-size:14px;margin-bottom:20px;text-transform:uppercase;letter-spacing:2px;font-weight:700;border-bottom:1px solid var(--crt-green);padding-bottom:8px}
+.intro p{margin-bottom:15px;line-height:1.8;opacity:0.85}
+.back-link{display:inline-block;margin-bottom:20px;color:var(--crt-green);text-decoration:none;font-size:11px;text-transform:uppercase;letter-spacing:1px;opacity:0.7}
+.back-link:hover{opacity:1}
+.back-link::before{content:'← '}
+.grid{display:block;margin-top:30px;border:1px solid var(--crt-dim)}
+.card{border-bottom:1px solid var(--crt-dim);padding:25px 20px;cursor:pointer}
+.card:hover{background:rgba(51,255,51,0.05)}
+.card-id{font-size:10px;color:var(--crt-green);margin-bottom:8px;letter-spacing:1.5px;font-weight:700;opacity:0.7}
+.card-title{font-size:16px;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
+.card-date{font-size:10px;color:var(--crt-dim);margin-bottom:12px;opacity:0.7}
+.card-desc{font-size:13px;line-height:1.6;opacity:0.8}
+.transmission-header{border:2px solid var(--crt-green);padding:35px;margin-bottom:40px}
+.transmission-id{font-size:10px;margin-bottom:10px;letter-spacing:2px;font-weight:700;opacity:0.7}
+.transmission-title{font-size:24px;font-weight:700;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+.transmission-date{font-size:10px;color:var(--crt-dim);margin-bottom:20px;opacity:0.7}
+.section{border:1px solid var(--crt-dim);border-left:3px solid var(--crt-dim);padding:25px;margin-bottom:30px}
+.section-title{font-size:11px;text-transform:uppercase;letter-spacing:2px;margin-bottom:18px;border-bottom:1px solid var(--crt-green);padding-bottom:8px;font-weight:700}
+.breakdown-table{width:100%;border-collapse:collapse;font-size:11px;border:1px solid var(--crt-dim);margin-bottom:35px}
+.breakdown-table thead{background:rgba(51,255,51,0.1)}
+.breakdown-table th{padding:10px 15px;text-align:left;font-weight:700;letter-spacing:1.5px;font-size:10px;border-right:1px solid var(--crt-dim);border-bottom:1px solid var(--crt-green)}
+.breakdown-table td{padding:12px 15px;border-bottom:1px solid var(--crt-dim);border-right:1px solid var(--crt-dim)}
+.breakdown-table tbody tr:hover{background:rgba(51,255,51,0.05)}
+.element-link{color:var(--crt-green);text-decoration:underline;cursor:pointer;font-weight:700}
+.element-link:hover{color:#fff;text-shadow:0 0 10px var(--crt-glow)}
+.type-badge{display:inline-block;padding:2px 6px;font-size:9px;letter-spacing:1px;font-weight:700;text-transform:uppercase;border:1px solid var(--crt-dim);opacity:0.8}
+.confidence-high{color:var(--crt-green);font-weight:700}
+.confidence-medium{color:var(--crt-dim);font-weight:700}
+.confidence-low{color:#ff3333;font-weight:700}
+.element-header{border:2px solid var(--crt-green);padding:35px;margin-bottom:40px}
+.element-type{font-size:10px;margin-bottom:12px;letter-spacing:2px;font-weight:700;opacity:0.7}
+.element-title{font-size:22px;font-weight:700;margin-bottom:10px;text-transform:uppercase;border-bottom:2px solid var(--crt-green);padding-bottom:10px}
+.element-credit{font-size:11px;color:var(--crt-dim);margin-bottom:25px;text-transform:uppercase;opacity:0.8}
+.metadata-grid{display:grid;grid-template-columns:140px 1fr;gap:12px 25px;font-size:11px;margin-bottom:25px;padding:20px;border:1px solid var(--crt-dim)}
+.metadata-label{font-size:9px;text-transform:uppercase;color:var(--crt-dim);font-weight:700;opacity:0.7}
+.metadata-value{font-size:11px;font-weight:700}
+.metadata-value a{color:var(--crt-green);text-decoration:underline}
+.metadata-notes{background:rgba(51,255,51,0.05);padding:20px;border-left:3px solid var(--crt-green);font-size:11px;line-height:1.7;margin-top:20px}
+.chat-container{border:1px solid var(--crt-dim);height:500px;overflow:hidden;margin-bottom:20px;background:rgba(0,0,0,0.3);position:relative}
+.chat-log{font-size:11px;line-height:2.2;position:absolute;width:calc(100% - 30px);left:15px;top:0}
+.chat-msg{margin-bottom:15px}
+.chat-user{color:var(--crt-green);font-weight:700}
+.chat-bot{color:var(--crt-dim);font-weight:700}
+.chat-location{color:var(--crt-dim);font-size:10px;margin-left:5px}
+.chat-timestamp{color:var(--crt-dim);font-size:10px;margin-right:8px}
+.chat-input-area{border:1px solid var(--crt-dim);padding:15px}
+.chat-input-area input{width:calc(100% - 100px);font-family:var(--mono);font-size:11px;padding:8px;border:1px solid var(--crt-green);background:var(--crt-bg);color:var(--crt-green);margin-right:10px}
+.chat-input-area button{font-family:var(--mono);font-size:10px;padding:8px 15px;border:1px solid var(--crt-green);background:transparent;color:var(--crt-green);cursor:pointer;text-transform:uppercase}
+.chat-input-area button:hover{background:var(--crt-green);color:var(--crt-bg)}
+.link-list{list-style:none}
+.link-list li{padding:10px 0;border-bottom:1px solid var(--crt-dim);font-size:11px}
+.link-list a{color:var(--crt-green);text-decoration:none}
+.link-list a:hover{text-decoration:underline;color:#fff}
+.filter-bar{border:1px solid var(--crt-dim);padding:20px;margin-bottom:30px;font-size:11px}
+.filter-bar label{margin-right:12px;text-transform:uppercase;font-size:10px;opacity:0.7}
+.filter-bar select,.filter-bar input{font-family:var(--mono);font-size:11px;padding:6px 10px;border:1px solid var(--crt-green);background:var(--crt-bg);color:var(--crt-green);margin-right:20px}
+.newsletter-form{border:1px solid var(--crt-dim);border-left:4px solid var(--crt-green);padding:25px;margin:40px 0}
+.newsletter-form h2{font-size:12px;text-transform:uppercase;margin-bottom:15px;border-bottom:1px solid var(--crt-green);padding-bottom:8px}
+.newsletter-form input{width:100%;font-family:var(--mono);font-size:11px;padding:8px;border:1px solid var(--crt-green);background:var(--crt-bg);color:var(--crt-green);margin-bottom:10px}
+.newsletter-form button{font-family:var(--mono);font-size:10px;padding:10px 20px;border:2px solid var(--crt-green);background:transparent;color:var(--crt-green);cursor:pointer;text-transform:uppercase;width:100%}
+.newsletter-form button:hover{background:var(--crt-green);color:var(--crt-bg)}
+.newsletter-form .privacy{font-size:10px;margin-top:10px;opacity:0.6}
+.newsletter-form .message{margin-top:10px;padding:10px;border:1px solid var(--crt-green);font-size:11px;display:none}
+.newsletter-form .message.success{color:var(--crt-green)}
+.newsletter-form .message.error{color:#ff3333;border-color:#ff3333}
+footer{margin-top:60px;padding-top:25px;border-top:1px solid var(--crt-dim);font-size:9px;color:var(--crt-dim);text-align:center;opacity:0.6;line-height:1.8}
+.btn,.btn:visited{display:inline-block;background:transparent;color:var(--crt-green);padding:12px 24px;text-decoration:none;font-size:10px;text-transform:uppercase;letter-spacing:2px;font-weight:700;border:2px solid var(--crt-green);cursor:pointer;margin-right:15px;margin-bottom:15px}
+.btn:hover{background:var(--crt-green);color:var(--crt-bg)}
+.cursor{animation:blink 1s infinite}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+@media (max-width: 768px){
+.container{padding:20px 15px}
+.logo{font-size:24px}
+.logo .cursor{font-size:18px}
+nav a{padding:5px 12px;font-size:9px}
+.breakdown-table{font-size:10px}
+.metadata-grid{grid-template-columns:1fr}
+}
+.audio-player{border:1px solid var(--crt-dim);padding:20px;margin:20px 0;background:rgba(0,0,0,0.3)}
+.audio-controls{display:flex;align-items:center;gap:15px;margin-bottom:15px}
+.play-btn{width:40px;height:40px;border:2px solid var(--crt-green);background:transparent;color:var(--crt-green);cursor:pointer;font-family:var(--mono);font-size:16px;transition:all .1s}
+.play-btn:hover{background:var(--crt-green);color:var(--crt-bg)}
+.time-display{font-family:var(--mono);font-size:11px;color:var(--crt-green);letter-spacing:1px;min-width:100px}
+.timeline{flex:1;height:4px;background:var(--crt-dim);position:relative;cursor:pointer}
+.timeline-progress{height:100%;background:var(--crt-green);width:0%;transition:width .1s}
+.timeline-handle{position:absolute;top:-4px;width:12px;height:12px;background:var(--crt-green);border:1px solid var(--crt-green);transform:translateX(-50%);cursor:pointer;box-shadow:0 0 5px var(--crt-glow)}
+.volume-control{display:flex;align-items:center;gap:10px}
+.volume-icon{font-family:var(--mono);font-size:14px;color:var(--crt-green)}
+.volume-slider{width:80px;height:4px;background:var(--crt-dim);position:relative;cursor:pointer}
+.volume-level{height:100%;background:var(--crt-green);width:100%}
+.track-info{font-family:var(--mono);font-size:10px;color:var(--crt-dim);margin-top:10px;opacity:0.7}
+
+
+/* --- Overrides (Jan 2026) --- */
+.stamp{
+  border:3px double var(--crt-green) !important;
+  color:var(--crt-green) !important;
+  background:rgba(40,212,40,0.06) !important;
+  box-shadow:0 0 10px rgba(40,212,40,0.15);
+}
+.volume-icon{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:1px;
+  opacity:0.9;
+}
+.filter-bar{
+  background:rgba(0,0,0,0.25);
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px 12px;
+  align-items:center;
+}
+.filter-bar label{margin-right:6px}
+.filter-bar select,.filter-bar input{
+  background:rgba(0,0,0,0.35);
+  border:1px solid var(--crt-green);
+}
+@media (max-width:640px){
+  nav{
+    display:flex;
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    white-space:nowrap;
+    -webkit-overflow-scrolling:touch;
+    padding-bottom:6px;
+  }
+  nav a{
+    flex:0 0 auto;
+    padding:8px 12px;
+  }
+  nav a:last-child{border-right:0}
+  nav::-webkit-scrollbar{height:6px}
+  nav::-webkit-scrollbar-thumb{background:rgba(40,212,40,0.25)}
+}
+
+
+/* Mobile: render tables as uniform full-width blocks (no horizontal scroll) */
+@media (max-width: 640px){
+  .breakdown-table thead{display:none}
+  .breakdown-table, .breakdown-table tbody, .breakdown-table tr{display:block;width:100%}
+  .breakdown-table tr{
+    border:1px solid var(--crt-dim);
+    margin:12px 0;
+    padding:10px;
+    background:rgba(0,0,0,0.25);
+  }
+  .breakdown-table td{
+    display:flex;
+    gap:10px;
+    width:100%;
+    padding:6px 0;
+    border:0;
+    align-items:flex-start;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+  }
+  .breakdown-table td:nth-child(1)::before{content:"TIME"; min-width:70px; color:var(--crt-dim); letter-spacing:1px;}
+  .breakdown-table td:nth-child(2)::before{content:"TYPE"; min-width:70px; color:var(--crt-dim); letter-spacing:1px;}
+  .breakdown-table td:nth-child(3)::before{content:"TITLE"; min-width:70px; color:var(--crt-dim); letter-spacing:1px;}
+  .breakdown-table td:nth-child(4)::before{content:"CREDIT"; min-width:70px; color:var(--crt-dim); letter-spacing:1px;}
+  .breakdown-table td:nth-child(5)::before{content:"CONF"; min-width:70px; color:var(--crt-dim); letter-spacing:1px;}
+  .breakdown-table td:nth-child(6)::before{content:"YEAR"; min-width:70px; color:var(--crt-dim); letter-spacing:1px;}
+  .breakdown-table a{overflow-wrap:anywhere; word-break:break-word;}
+  .type-badge{display:inline-block; max-width:100%; white-space:nowrap;}
+}
+
+
+.play-btn:disabled{
+  opacity:0.35;
+  cursor:not-allowed;
+}
+
+
+/* Make Transmission Archive header block distinct from the list */
+.tagline-sub{opacity:0.65; filter: blur(0.9px);}
+
+
+/* Session gate */
+.session-indicator{margin-top:10px;font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--crt-dim);opacity:.85;filter:blur(.35px)}
+.session-indicator b{color:var(--crt-green);font-weight:400}
+#session-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);display:none;align-items:center;justify-content:center;z-index:9999;padding:20px}
+#session-overlay.active{display:flex}
+.session-panel{width:min(520px,100%);border:1px solid var(--crt-dim);background:rgba(0,0,0,.55);box-shadow:0 0 35px rgba(0,255,80,.12);padding:22px}
+.session-panel h2{margin:0 0 10px 0;font-size:14px;letter-spacing:3px}
+.session-panel .meta{font-family:var(--mono);font-size:10px;color:var(--crt-dim);line-height:1.5;filter:blur(.25px)}
+.session-panel .row{display:flex;gap:12px;align-items:center;margin-top:14px;flex-wrap:wrap}
+.session-panel label{font-family:var(--mono);font-size:10px;color:var(--crt-dim);letter-spacing:2px}
+.session-input{flex:1;min-width:220px;border:1px solid var(--crt-dim);background:rgba(0,0,0,.45);color:var(--crt-green);padding:10px 12px;font-family:var(--mono);font-size:12px;outline:none}
+.session-actions{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap}
+.session-btn{border:1px solid var(--crt-green);background:transparent;color:var(--crt-green);padding:10px 12px;font-family:var(--mono);font-size:11px;letter-spacing:2px;cursor:pointer}
+.session-btn.primary{background:var(--crt-green);color:var(--crt-bg)}
+.session-btn:hover{box-shadow:0 0 12px rgba(0,255,80,.18)}
+.session-note{margin-top:14px;font-family:var(--mono);font-size:10px;color:var(--crt-dim);opacity:.85;line-height:1.6}
+
+
+
+/* --- WLSN tweaks: nav glow, badges, mobile uniformity --- */
+.nav a{
+  position: relative;
+  display: inline-block;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+}
+.nav a:hover{
+  border-color: var(--crt-green);
+  box-shadow: 0 0 14px rgba(0,255,102,0.25);
+}
+
+.stamp{
+  display: inline-block;
+  padding: 6px 10px;
+  border: 1px dashed var(--crt-dim);
+  color: var(--crt-green);
+  background: rgba(0,0,0,0.25);
+  letter-spacing: 2px;
+  font-size: 10px;
+  cursor: default;
+}
+
+/* Transmission page filters */
+.transmission-filters{
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: 16px 0;
+  padding: 12px;
+  border: 1px solid var(--crt-dim);
+  background: rgba(0,0,0,0.25);
+}
+.transmission-filters input,
+.transmission-filters select{
+  flex: 1;
+  min-width: 0;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--crt-dim);
+  color: var(--crt-green);
+  padding: 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.transmission-filters select{flex: 0.6;}
+
+/* Discussion: clearer hierarchy */
+.discussion-actions{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 16px;
+}
+.action-box{
+  border: 1px solid var(--crt-dim);
+  background: rgba(0,0,0,0.25);
+  padding: 14px;
+}
+.action-box .section-title{margin-top:0;}
+
+/* Mobile: keep everything in one width, no sideways scrolling */
+@media (max-width: 640px){
+  .container{padding-left: 12px; padding-right: 12px;}
+  .nav{display:flex; flex-wrap:wrap; gap:6px;}
+  .nav a{flex:1; text-align:center; padding:10px 8px;}
+  table{display:block; width:100%; overflow-x:hidden;}
+  thead{display:none;}
+  tbody{display:block;}
+  tr{display:block; border:1px solid var(--crt-dim); margin-bottom:10px; padding:10px; background: rgba(0,0,0,0.18);}
+  td{display:flex; justify-content:space-between; gap:12px; padding:6px 0; border:none;}
+  td:before{content: attr(data-label); color: var(--crt-dim); letter-spacing: 1px;}
+  .discussion-actions{grid-template-columns: 1fr;}
+}
+
+</style>
+
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+</head>
+<body>
+</div>
+
+
+<div id="session-overlay" class="overlay hidden" aria-hidden="true">
+  <div class="login-panel">
+    <div class="login-title">SESSION INITIATED</div>
+    <div class="login-meta">SESSION: <span id="session-id"></span></div>
+    <div class="login-row">
+      <label for="alias-input">ALIAS (OPTIONAL)</label>
+      <input id="alias-input" maxlength="18" placeholder="enter a handle" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="login-actions">
+      <button id="anon-btn" class="btn outline" type="button">PROCEED AS ANONYMOUS</button>
+      <button id="enter-btn" class="btn" type="button">ENTER ARCHIVE</button>
+    </div>
+    <div class="login-foot">Local to this visit. Nothing is stored.</div>
+  </div>
+</div>
+</div>
+
+
+<div class="container">
+<header>
+<div class="logo">WLSN<span class="cursor">█</span></div>
+<div class="tagline">Western Light and Sound Network</div>
+<div class="tagline tagline-sub">Signal Archive</div>
+<div id="session-indicator" class="session-indicator"></div>
+<nav class="nav">
+<a href="#home">Home</a>
+<a href="#transmissions">Transmissions</a>
+<a href="#discussion">Discussion</a>
+</nav>
+</header>
+<main id="app"></main>
+<footer>
+WLSN ARCHIVE SYSTEM | EST. 1967 | DECLASSIFIED 2025<br>
+Produced by Brain Crampsmen for WLSN under the ONE Signal distribution mark.
+</footer>
+</div>
+
+<script>
+const D={transmissions:[{id:"001",title:"Initial Signal Test",date:"1967-08-12",dateFormatted:"12 AUG 1967",audioUrl:"audio/WLSN - Color Radio from Space - TRANSMISSION 001 - -Initial Signal Test - RECORDED- 12 AUG 1967_2_01.mp3",description:"First recorded transmission. Test pattern followed by musical fragments.",notes:"Recovered from magnetic tape, reel 001-A. Signal degradation minimal.",elements:["e001","e002","e036","e003","e004"]},{id:"002",title:"Evening Broadcast",date:"1967-09-03",dateFormatted:"03 SEP 1967",audioUrl:"",description:"Regular programming. Mix of commercial recordings and field recordings.",notes:"Source uncertain. Possible aircheck from listening post.",elements:["e005","e037","e006","e007"]},{id:"003",title:"Late Night Transmission",date:"1968-03-15",dateFormatted:"15 MAR 1968",audioUrl:"",description:"Extended broadcast. Commercial pop, psychedelic rock, and vintage TV clips.",notes:"Tape quality excellent. Multiple sources spliced together.",elements:["e035","e008","e009","e010","e011","e012","e038","e013","e014","e015","e016","e017","e018","e019","e020","e021","e022","e023","e024","e025","e026","e027","e039","e028","e029","e030","e031","e032","e033","e034"]}],elements:[{id:"e001",transmission_id:"001",start_time:"00:00",end_time:"00:45",type:"jingle",title:"WLSN Station Identification",primary_credit:"Unknown Announcer",source:"WLSN Internal Recording",year:"1967",notes:"Male voice, professional broadcast training evident.",confidence:"high"},{id:"e002",transmission_id:"001",start_time:"00:45",end_time:"04:12",type:"song",title:"Blue in Green",primary_credit:"Miles Davis",source:"Kind of Blue (Columbia, 1959)",year:"1959",notes:"Partial recording. Fades at 3:12.",confidence:"high"},{id:"e003",transmission_id:"001",start_time:"04:12",end_time:"04:30",type:"unknown",title:"Unidentified Voice Fragment",primary_credit:"Unknown",source:"Unknown",year:null,notes:"Female voice. Language unclear. Possible crosstalk from adjacent frequency.",confidence:"low"},{id:"e004",transmission_id:"001",start_time:"04:30",end_time:"05:00",type:"technical",title:"1kHz Test Tone",primary_credit:"WLSN Technical",source:"Standard Broadcast Calibration",year:"1967",notes:"Frequency reference signal.",confidence:"high"},{id:"e036",transmission_id:"001",start_time:"02:18",end_time:"02:22",type:"unknown",title:"Carrier Wave Interference",primary_credit:"Unknown",source:"Unknown",year:null,notes:"Brief heterodyne whistle. Frequency bleed from 91.3 FM range.",confidence:"low"},{id:"e005",transmission_id:"002",start_time:"00:00",end_time:"00:15",type:"technical",title:"Time Signal",primary_credit:"WLSN Technical",source:"GMT Synchronization",year:"1967",notes:"Six pip sequence. Standard WWV format.",confidence:"high"},{id:"e006",transmission_id:"002",start_time:"00:15",end_time:"07:45",type:"song",title:"A Love Supreme, Pt 1",primary_credit:"John Coltrane",source:"A Love Supreme (Impulse!, 1965)",year:"1965",notes:"Complete Part 1. Excellent fidelity.",confidence:"high"},{id:"e007",transmission_id:"002",start_time:"07:45",end_time:"08:10",type:"commercial",title:"Coca-Cola Advertisement",primary_credit:"Coca-Cola Company",source:"National Radio Campaign",year:"1967",notes:"Things Go Better campaign.",confidence:"medium"},{id:"e037",transmission_id:"002",start_time:"04:22",end_time:"04:31",type:"unknown",title:"Spanish Language Fragment",primary_credit:"Unknown",source:"Unknown",year:null,notes:"Male voice speaking Spanish. Likely Mexican border station bleed.",confidence:"low"},{id:"e008",transmission_id:"003",start_time:"00:00",end_time:"00:15",type:"jingle",title:"93KHJ Weather Report",primary_credit:"KHJ Los Angeles",source:"KHJ Boss Radio",year:"1968",notes:"Station identification and weather.",confidence:"high"},{id:"e009",transmission_id:"003",start_time:"00:15",end_time:"00:45",type:"commercial",title:"Sugar Crisp Commercial",primary_credit:"Post Cereals",source:"Sugar Bear campaign",year:"1968",notes:"Animated mascot voice.",confidence:"high"},{id:"e010",transmission_id:"003",start_time:"00:45",end_time:"03:30",type:"song",title:"Look Through My Window",primary_credit:"The Mamas & The Papas",source:"The Mamas & The Papas Deliver (Dunhill, 1967)",year:"1967",notes:"Album track, not a single.",confidence:"high"},{id:"e011",transmission_id:"003",start_time:"03:30",end_time:"06:15",type:"song",title:"The Dance at the Gym",primary_credit:"West Side Story Cast",source:"West Side Story Soundtrack (Columbia, 1961)",year:"1961",notes:"Mambo/Blues sequence.",confidence:"high"},{id:"e012",transmission_id:"003",start_time:"06:15",end_time:"08:30",type:"song",title:"Pray for Surf",primary_credit:"The Honeys",source:"Surfin' Down the Swanee River (Capitol, 1963)",year:"1963",notes:"Brian Wilson production.",confidence:"high"},{id:"e013",transmission_id:"003",start_time:"08:30",end_time:"10:45",type:"song",title:"Easy as 1-2-3",primary_credit:"Jan & Dean",source:"Jan & Dean Meet Batman (Liberty, 1966)",year:"1966",notes:"Rare album track.",confidence:"medium"},{id:"e014",transmission_id:"003",start_time:"10:45",end_time:"12:50",type:"song",title:"Run Run Run",primary_credit:"The Gestures",source:"Single (Soma, 1964)",year:"1964",notes:"Regional hit, Minnesota band.",confidence:"high"},{id:"e015",transmission_id:"003",start_time:"12:50",end_time:"15:20",type:"song",title:"Underdog",primary_credit:"Sly & The Family Stone",source:"A Whole New Thing (Epic, 1967)",year:"1967",notes:"Deep cut from debut album.",confidence:"high"},{id:"e016",transmission_id:"003",start_time:"15:20",end_time:"18:00",type:"song",title:"Sarah Saturday",primary_credit:"Lazy Smoke",source:"Corridor of Faces (Onyx, 1968)",year:"1968",notes:"Rare psych pressing.",confidence:"medium"},{id:"e017",transmission_id:"003",start_time:"18:00",end_time:"20:30",type:"song",title:"Tomorrow",primary_credit:"Strawberry Alarm Clock",source:"Incense and Peppermints (Uni, 1967)",year:"1967",notes:"Album track, non-single.",confidence:"high"},{id:"e018",transmission_id:"003",start_time:"20:30",end_time:"22:45",type:"song",title:"Mama Says",primary_credit:"The Beach Boys",source:"Friends (Capitol, 1968)",year:"1968",notes:"Brian Wilson/Mike Love composition.",confidence:"high"},{id:"e019",transmission_id:"003",start_time:"22:45",end_time:"25:00",type:"song",title:"Going Out of My Head",primary_credit:"The Zombies",source:"Odessey and Oracle (CBS, 1968)",year:"1968",notes:"Rod Argent arrangement.",confidence:"high"},{id:"e020",transmission_id:"003",start_time:"25:00",end_time:"27:15",type:"song",title:"Please No More Sad Songs",primary_credit:"The Idle Race",source:"The Birthday Party (Liberty, 1968)",year:"1968",notes:"Jeff Lynne pre-ELO.",confidence:"high"},{id:"e021",transmission_id:"003",start_time:"27:15",end_time:"30:00",type:"song",title:"Compared to What",primary_credit:"Les McCann",source:"Swiss Movement (Atlantic, 1969)",year:"1969",notes:"Live at Montreux Jazz Festival.",confidence:"high"},{id:"e022",transmission_id:"003",start_time:"30:00",end_time:"31:00",type:"song",title:"Lost in Space Theme",primary_credit:"John Williams",source:"Lost in Space TV Series (CBS, 1965)",year:"1965",notes:"Opening title sequence.",confidence:"high"},{id:"e023",transmission_id:"003",start_time:"31:00",end_time:"33:30",type:"song",title:"In My Lonely Room",primary_credit:"Martha Reeves & The Vandellas",source:"Dance Party (Gordy, 1965)",year:"1965",notes:"Holland-Dozier-Holland production.",confidence:"high"},{id:"e024",transmission_id:"003",start_time:"33:30",end_time:"34:30",type:"spoken",title:"Petticoat Junction - Mrs Strauss Clip",primary_credit:"Petticoat Junction Cast",source:"Petticoat Junction TV Series (CBS, 1964)",year:"1964",notes:"Dialog excerpt from early episode.",confidence:"medium"},{id:"e025",transmission_id:"003",start_time:"34:30",end_time:"35:00",type:"sound",title:"TAMI Show Audience Cheering",primary_credit:"TAMI Show",source:"Teenage Awards Music International (1964)",year:"1964",notes:"Concert film SFX.",confidence:"high"},{id:"e026",transmission_id:"003",start_time:"35:00",end_time:"37:30",type:"song",title:"TAMI Show - Chuck Berry Performance",primary_credit:"Chuck Berry",source:"TAMI Show (1964)",year:"1964",notes:"Live performance excerpt.",confidence:"high"},{id:"e027",transmission_id:"003",start_time:"37:30",end_time:"39:00",type:"song",title:"Spiritual Regeneration",primary_credit:"The Beatles",source:"Unreleased Demo (1967)",year:"1967",notes:"Rare bootleg circulation.",confidence:"low"},{id:"e028",transmission_id:"003",start_time:"39:00",end_time:"41:15",type:"song",title:"2002 A Hit Song",primary_credit:"The Free Design",source:"Heaven/Earth (Project 3, 1969)",year:"1969",notes:"Baroque pop arrangement.",confidence:"high"},{id:"e029",transmission_id:"003",start_time:"41:15",end_time:"43:30",type:"song",title:"Double Yellow Line",primary_credit:"The Music Machine",source:"Single (Original Sound, 1967)",year:"1967",notes:"Sean Bonniwell composition.",confidence:"high"},{id:"e030",transmission_id:"003",start_time:"43:30",end_time:"45:45",type:"song",title:"She Loves You",primary_credit:"The Beatles",source:"Single (Parlophone, 1963)",year:"1963",notes:"Yeah yeah yeah.",confidence:"high"},{id:"e031",transmission_id:"003",start_time:"45:45",end_time:"48:30",type:"song",title:"God Only Knows",primary_credit:"The Beach Boys",source:"Pet Sounds (Capitol, 1966)",year:"1966",notes:"Brian Wilson/Tony Asher.",confidence:"high"},{id:"e032",transmission_id:"003",start_time:"48:30",end_time:"49:30",type:"spoken",title:"It Came from Outer Space Narration",primary_credit:"Jack Arnold",source:"It Came from Outer Space (Universal, 1953)",year:"1953",notes:"Opening narration excerpt.",confidence:"medium"},{id:"e033",transmission_id:"003",start_time:"49:30",end_time:"50:30",type:"spoken",title:"Robinson Crusoe on Mars Narration",primary_credit:"Byron Haskin",source:"Robinson Crusoe on Mars (Paramount, 1964)",year:"1964",notes:"Dialog excerpt.",confidence:"medium"},{id:"e034",transmission_id:"003",start_time:"50:30",end_time:"54:00",type:"song",title:"Surf's Up (Solo Piano)",primary_credit:"Brian Wilson",source:"Inside Pop: The Rock Revolution (CBS, 1967)",year:"1967",notes:"Leonard Bernstein documentary. Solo performance.",confidence:"high"},{id:"e035",transmission_id:"003",start_time:"00:08",end_time:"00:23",type:"jingle",title:"WLS Radio Sting",primary_credit:"WLS Chicago / Anita Kerr Singers",source:"WLS Boss Radio (1967)",year:"1967",notes:"Station identification jingle.",confidence:"high"},{id:"e038",transmission_id:"003",start_time:"12:08",end_time:"12:15",type:"unknown",title:"Morse Code Pattern",primary_credit:"Unknown",source:"Unknown",year:null,notes:"Rhythmic beeping. Amateur radio or maritime signal interference.",confidence:"low"},{id:"e039",transmission_id:"003",start_time:"28:45",end_time:"28:52",type:"unknown",title:"Distorted Music Fragment",primary_credit:"Unknown",source:"Unknown",year:null,notes:"Heavily degraded instrumental. Possibly jazz. Source unidentifiable.",confidence:"low"}]};
+
+class App{
+
+initSessionGate(){
+  const existingUser=sessionStorage.getItem('wlsn_user');
+  const existingSession=sessionStorage.getItem('wlsn_session');
+  const existingStart=sessionStorage.getItem('wlsn_start');
+  if(existingUser && existingSession && existingStart){
+    this.updateSessionIndicator();
+    return;
+  }
+  const overlay=document.getElementById('session-overlay');
+  const idEl=document.getElementById('session-id');
+  const nameEl=document.getElementById('session-name');
+  const anonBtn=document.getElementById('session-anon');
+  const enterBtn=document.getElementById('session-enter');
+  if(!overlay || !idEl || !nameEl || !anonBtn || !enterBtn){
+    return;
+  }
+
+  const genId=()=>{
+    const s=Math.random().toString(36).slice(2,10).toUpperCase();
+    const t=Math.random().toString(36).slice(2,6).toUpperCase();
+    return (s+t).slice(0,10);
+  };
+
+  const sessionId=genId();
+  idEl.textContent=sessionId;
+
+  const activate=()=>{
+    overlay.classList.add('active');
+    overlay.setAttribute('aria-hidden','false');
+    document.documentElement.style.overflow='hidden';
+    setTimeout(()=>nameEl.focus(),50);
+  };
+
+  const commit=(name)=>{
+    const safe=(name||'').trim().replace(/[^a-zA-Z0-9 _-]/g,'').slice(0,24);
+    const finalName=safe.length?safe:'Anonymous';
+    sessionStorage.setItem('wlsn_user', finalName);
+    sessionStorage.setItem('wlsn_session', sessionId);
+    sessionStorage.setItem('wlsn_start', String(Date.now()));
+    overlay.classList.remove('active');
+    overlay.setAttribute('aria-hidden','true');
+    document.documentElement.style.overflow='';
+    this.updateSessionIndicator();
+  };
+
+  anonBtn.onclick=()=>commit('Anonymous');
+  enterBtn.onclick=()=>commit(nameEl.value);
+  nameEl.addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ commit(nameEl.value); } });
+
+  activate();
+}
+
+updateSessionIndicator(){
+  const el=document.getElementById('session-indicator');
+  if(!el) return;
+  const user=sessionStorage.getItem('wlsn_user')||'Anonymous';
+  const session=sessionStorage.getItem('wlsn_session')||'';
+  const start=parseInt(sessionStorage.getItem('wlsn_start')||'0');
+  const fmt=(ms)=>{
+    const s=Math.max(0, parseInt(ms/1000));
+    const h=parseInt(s/3600);
+    const m=parseInt((s%3600)/60);
+    const ss=parseInt(s%60);
+    const pad=(n)=>String(n).padStart(2,'0');
+    return `${pad(h)}:${pad(m)}:${pad(ss)}`;
+  };
+  const render=()=>{
+    const now=Date.now();
+    const runtime= start? fmt(now-start) : '00:00:00';
+    el.innerHTML=`LOGGED AS <b>${user}</b>  |  SESSION <b>${session}</b>  |  UPTIME <b>${runtime}</b>`;
+  };
+  render();
+  if(this._sessionTimer) clearInterval(this._sessionTimer);
+  this._sessionTimer=setInterval(render,1000);
+}
+
+
+constructor(){
+this.data=D;
+this.filter={type:'all',search:'',sort:'appearance'};
+this.chatMessages=[];
+this.chatScrollPos=0;
+this.chatBots=[
+{name:'djmoondust',location:'Portland, OR'},
+{name:'tape_hound',location:'London, UK'},
+{name:'freq_drift',location:'Tokyo, JP'},
+{name:'vinyl_archive',location:'Melbourne, AU'},
+{name:'signal_lost',location:'Brooklyn, NY'},
+{name:'reel_to_reel',location:'Berlin, DE'}
+];
+this.botMessages=[
+{bot:1,text:"001: anyone else catch the tone dip right after the ident? sounds like the deck grabbed.",reply:true},
+{bot:3,text:"003 has a clean KHJ weather tag at the top, but the noise floor feels wrong for aircheck."},
+{bot:0,text:"The WLSN ident shows up in at least three places, but never the same length twice."},
+{bot:4,text:"02:18 in 001: that whistle is back. not loud, but it sits in the same band.",reply:true},
+{bot:2,text:"i tried matching the cereal spot in 003, close but not exact. could be a regional cut?"},
+{bot:5,text:"Hard splice at 03:22 on 002, then it comes back brighter. two passes of the same capture?",reply:true},
+{bot:1,text:"If this was rebroadcast, why keep the bleed? feels like the bleed is the point."},
+{bot:3,text:"Tape box handwriting switches formats mid-run. month/day once, then day.month."},
+{bot:0,text:"Small thing: the ident consonants smear like it was played off a speaker into a mic.",reply:true},
+{bot:4,text:"Some tracks run just a hair fast. could be wow/flutter, could be the source speed."},
+{bot:2,text:"Anyone have a lead on the four note chime? it sounds packaged, like a station kit."},
+{bot:5,text:"i keep hearing room tone under the music. like a second space underneath.",reply:true},
+{bot:1,text:"003: the word 'network' pops once, then never again. too clean to be accident."},
+{bot:3,text:"I do not love how clean that word is. it sits on top of the hiss, not inside it."},
+{bot:0,text:"Reminder: tag artifacts separately from tracks. this is not a playlist.",reply:true},
+{bot:4,text:"If anyone is keeping notes: recurring artifacts are the only thing that feels intentional."},
+{bot:2,text:"new guess: not a station, not a mixtape. a transmitter testing a collage rig.",reply:true},
+{bot:5,text:"whatever it is, the edits are confident. whoever did this knew radio."},
+{bot:1,text:"Log window closes in 24h. post timestamps if you want it in the next pass.",reply:true}
+];
+this.visitorResponses=[
+"timestamp?",
+"good ear",
+"not convinced",
+"that feels like deck noise",
+"any source for that?",
+"clip it and post timecode",
+"could be adjacent-channel bleed",
+"same artifact shows up in 003",
+"i hear it now",
+"wild if true",
+"might be speed drift",
+"that jingle is familiar",
+"post your notes",
+"does anyone have the reel box scan?",
+"why is that so clean",
+"this is getting weird",
+"new theory: private transmitter",
+"i need headphones for this",
+"catalog it as an artifact",
+"save that for the next pass"
+];
+this.init();
+}
+init(){
+this.initSessionGate();
+window.addEventListener('hashchange',()=>this.route());
+this.route();
+this.initChat();
+}
+initChat(){
+this.shuffleArray(this.botMessages);
+for(let i=0;i<15;i++){
+const msg=this.botMessages[i%this.botMessages.length];
+const bot=this.chatBots[msg.bot];
+const now=new Date();
+const time=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+this.chatMessages.push({user:bot.name,location:bot.location,text:msg.text,time,isBot:true});
+}
+}
+shuffleArray(arr){
+for(let i=arr.length-1;i>0;i--){
+const j=Math.floor(Math.random()*(i+1));
+[arr[i],arr[j]]=[arr[j],arr[i]];
+}
+}
+startChatScroll(){
+if(this.chatInterval)clearInterval(this.chatInterval);
+this.chatInterval=setInterval(()=>{
+if(window.location.hash.includes('discussion')){
+const container=document.querySelector('.chat-log');
+if(container){
+const lineHeight=parseFloat(getComputedStyle(container).lineHeight);
+this.chatScrollPos-=lineHeight;
+container.style.transform=`translateY(${this.chatScrollPos}px)`;
+if(Math.abs(this.chatScrollPos)>container.offsetHeight){
+const msgIdx=this.chatMessages.length%this.botMessages.length;
+const msg=this.botMessages[msgIdx];
+const bot=this.chatBots[msg.bot];
+const now=new Date();
+const time=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+this.chatMessages.push({user:bot.name,location:bot.location,text:msg.text,time,isBot:true});
+this.renderChat();
+this.chatScrollPos=0;
+}
+}
+}
+},10000);
+}
+route(){
+const h=window.location.hash.slice(1)||'home';
+const p=h.split('/');
+this.render(p[0],p[1]);
+document.querySelectorAll('nav a').forEach(a=>{
+a.classList.toggle('active',a.getAttribute('href')==='#'+p[0]);
+});
+}
+render(pg,id){
+const a=document.getElementById('app');
+if(pg==='home')a.innerHTML=this.rHome();
+else if(pg==='transmissions')a.innerHTML=this.rTrans();
+else if(pg==='transmission')
+{
+  a.innerHTML=this.rTransmission(id);
+  this.initAudioPlayer();
+  const t=this.data.transmissions.find(x=>x.id===id);
+  const els=t?this.data.elements.filter(e=>t.elements.includes(e.id)):[];
+  this.attachTransmissionFilters(els);
+}
+else if(pg==='elements')a.innerHTML=this.rTrans();
+else if(pg==='element')a.innerHTML=this.rElem(id);
+else if(pg==='discussion')a.innerHTML=this.rDiscussion();
+else if(pg==='about')a.innerHTML=this.rHome();
+else a.innerHTML=this.rHome();
+
+this.attachLinks();
+this.attachFilters();
+
+this.updateSessionIndicator();
+if(pg==='discussion'){
+this.renderChat();
+this.startChatScroll();
+this.attachChatInput();
+this.attachNewsletter();
+}
+}
+
+rHome(){
+const l=this.data.transmissions[this.data.transmissions.length-1];
+const total=this.data.elements.length;
+return `<div class="intro">
+  <h1>WLSN Transmission Archive</h1>
+  <p>WLSN surfaced sporadically across the FM band in rural California, 1967–1969. The recordings that survived were digitized in 2024 and labeled <em>Color Radio from Space</em>.</p>
+  <p>This archive catalogs identifiable music, voices, and fragments embedded in the transmissions. Some sources remain unconfirmed.</p>
+</div>
+
+<div class="section">
+  <div class="section-title">System Status</div>
+  <p>> CLOCK SYNC: LOCKED</p>
+  <p>> FREQUENCY PATTERN: UNSTABLE</p>
+  <p>> STATUS: ACTIVE</p>
+  <p>> CATALOG ENTRIES: ${total}</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <div>
+      <div class="card-title">Latest Transmission</div>
+      <div class="card-sub">TRANSMISSION ${l.id} // RECORDED: ${l.dateFormatted}</div>
+    </div>
+    <div class="stamp">ARCHIVED</div>
+  </div>
+  <div class="card-desc">${l.description}</div>
+  <div style="margin-top:12px;">
+    <a href="#transmission/${l.id}" class="btn">Open Transmission</a>
+    <a href="#transmissions" class="btn">Browse Archive</a>
+</div>
+</div>`;
+}
+
+rTrans(){
+return`<div class="intro">
+  <h1>Transmission Archive</h1>
+  <p>Recovered broadcasts ordered chronologically by transmission date.</p>
+</div><div class="grid">${this.data.transmissions.map(t=>`<div class="card" data-link="transmission/${t.id}"><div class="card-id">TRANSMISSION ${t.id}</div><div class="card-title">${t.title}</div><div class="card-date">${t.dateFormatted}</div><div class="card-desc">${t.description}</div></div>`).join('')}</div>`;
+}
+rTransmission(id){
+const t=this.data.transmissions.find(x=>x.id===id);
+if(!t)return'<p>Not found.</p>';
+const els=this.data.elements.filter(e=>t.elements.includes(e.id));
+return`<a href="#transmissions" class="back-link">Back to Transmissions</a>
+<div class="transmission-header">
+  <div class="transmission-id">TRANSMISSION ${t.id}</div>
+  <h1 class="transmission-title">${t.title}</h1>
+  <div class="transmission-date">RECORDED: ${t.dateFormatted}</div>
+  <div class="stamp">RECEIVED</div>
+  <p>${t.description}</p>
+</div>
+${`
+<div class="audio-player" data-audio-ready="${t.audioUrl ? '1' : '0'}">
+  <div class="audio-controls">
+    <button class="play-btn" id="play-btn" ${t.audioUrl ? '' : 'disabled'}>${t.audioUrl ? '▶' : '|'}</button>
+    <div class="time-display" id="time-display">${t.audioUrl ? '00:00 / 00:00' : 'NO AUDIO / 00:00'}</div>
+    <div class="timeline" id="timeline" style="${t.audioUrl ? '' : 'opacity:0.35; pointer-events:none;'}">
+      <div class="timeline-progress" id="timeline-progress"></div>
+      <div class="timeline-handle" id="timeline-handle"></div>
+    </div>
+    <div class="volume-control" style="${t.audioUrl ? '' : 'opacity:0.35; pointer-events:none;'}">
+      <span class="volume-icon">VOL</span>
+      <div class="volume-slider" id="volume-slider">
+        <div class="volume-level" id="volume-level"></div>
+      </div>
+    </div>
+  </div>
+  <div class="track-info">TRANSMISSION ${t.id} // ${t.dateFormatted} // SOURCE: REEL-TO-REEL ${t.audioUrl ? '' : '// FILE PENDING'}</div>
+  <audio id="audio-element" ${t.audioUrl ? `src="${t.audioUrl}"` : ''} preload="metadata"></audio>
+</div>
+`}
+<div class="transmission-filters">
+  <input id="trans-filter-search" class="filter-input" type="text" placeholder="Filter elements...">
+  <select id="trans-filter-type" class="filter-select"></select>
+</div>
+<table class="breakdown-table">
+  <thead><tr><th>TIME</th><th>TYPE</th><th>TITLE</th><th>CREDIT</th><th>CONF.</th></tr></thead>
+  <tbody>
+    ${els.map(e=>`<tr class="el-row" data-type="${e.type}">
+      <td>${e.start_time}${e.end_time?'-'+e.end_time:''}</td>
+      <td><span class="type-badge">${e.type}</span></td>
+      <td><a href="#element/${e.id}" class="element-link">${e.title}</a></td>
+      <td>${e.primary_credit||'-'}</td>
+      <td class="confidence-${e.confidence}">${e.confidence.toUpperCase()}</td>
+    </tr>`).join('')}
+  </tbody>
+</table>
+<div class="section"><div class="section-title">Archival Notes</div><p>${t.notes}</p></div>`;
+}
+rElems(){
+let els=[...this.data.elements];
+if(this.filter.type!=='all')els=els.filter(e=>e.type===this.filter.type);
+if(this.filter.search){
+const s=this.filter.search.toLowerCase();
+els=els.filter(e=>e.title.toLowerCase().includes(s)||(e.primary_credit&&e.primary_credit.toLowerCase().includes(s)));
+}
+if(this.filter.sort==='year')els.sort((a,b)=>(a.year||9999)-(b.year||9999));
+const types=['all','song','commercial','jingle','spoken','interview','field','sound','technical','unknown'];
+return`<div class="intro"><h1>Element Archive</h1><p>Complete catalogue of identified elements. ${els.length} elements catalogued.</p></div><div class="filter-bar"><label>TYPE:</label><select id="type-filter">${types.map(t=>`<option value="${t}"${this.filter.type===t?' selected':''}>${t.toUpperCase()}</option>`).join('')}</select><label>SEARCH:</label><input type="text" id="search-filter" placeholder="Title or credit..." value="${this.filter.search}"><label>SORT:</label><select id="sort-filter"><option value="appearance"${this.filter.sort==='appearance'?' selected':''}>BY APPEARANCE</option><option value="year"${this.filter.sort==='year'?' selected':''}>BY YEAR</option></select></div><div id="elements-results"><table class="breakdown-table"><thead><tr><th>ID</th><th>TYPE</th><th>TITLE</th><th>CREDIT</th><th>YEAR</th><th>CONF.</th></tr></thead><tbody>${els.map(e=>`<tr class="el-row" data-type="${e.type}"><td>${e.id.toUpperCase()}</td><td data-label="TYPE"><span class="type-badge">${e.type}</span></td><td data-label="TITLE"><a href="#element/${e.id}" class="element-link">${e.title}</a></td><td data-label="CREDIT">${e.primary_credit||'|'}</td><td>${e.year||'|'}</td><td data-label="CONF." class="confidence-${e.confidence}">${e.confidence.toUpperCase()}</td></tr>`).join('')}</tbody></table></div>`;
+}
+updateElementsTable(){
+let els=[...this.data.elements];
+if(this.filter.type!=='all')els=els.filter(e=>e.type===this.filter.type);
+if(this.filter.search){
+const s=this.filter.search.toLowerCase();
+els=els.filter(e=>e.title.toLowerCase().includes(s)||(e.primary_credit&&e.primary_credit.toLowerCase().includes(s)));
+}
+if(this.filter.sort==='year')els.sort((a,b)=>(a.year||9999)-(b.year||9999));
+const r=document.getElementById('elements-results');
+if(r){
+r.innerHTML=`<table class="breakdown-table"><thead><tr><th>ID</th><th>TYPE</th><th>TITLE</th><th>CREDIT</th><th>YEAR</th><th>CONF.</th></tr></thead><tbody>${els.map(e=>`<tr class="el-row" data-type="${e.type}"><td>${e.id.toUpperCase()}</td><td data-label="TYPE"><span class="type-badge">${e.type}</span></td><td data-label="TITLE"><a href="#element/${e.id}" class="element-link">${e.title}</a></td><td data-label="CREDIT">${e.primary_credit||'|'}</td><td>${e.year||'|'}</td><td data-label="CONF." class="confidence-${e.confidence}">${e.confidence.toUpperCase()}</td></tr>`).join('')}</tbody></table>`;
+this.attachLinks();
+}
+}
+rElem(id){
+const e=this.data.elements.find(x=>x.id===id);
+if(!e)return'<p>Not found.</p>';
+const t=this.data.transmissions.find(x=>x.id===e.transmission_id);
+return`<a href="#transmissions" class="back-link">Back to Transmissions</a><div class="element-header"><div class="element-type">ELEMENT DOSSIER // ${e.id.toUpperCase()} // ${e.type.toUpperCase()}</div><h1 class="element-title">${e.title}</h1><div class="element-credit">${e.primary_credit||'Unknown'}</div><div class="metadata-grid"><div class="metadata-label">Transmission:</div><div class="metadata-value"><a href="#transmission/${t.id}">TRANSMISSION ${t.id} | ${t.title}</a></div><div class="metadata-label">Timestamp:</div><div class="metadata-value">${e.start_time}${e.end_time?' - '+e.end_time:''}</div><div class="metadata-label">Source:</div><div class="metadata-value">${e.source||'|'}</div><div class="metadata-label">Year:</div><div class="metadata-value">${e.year||'Unknown'}</div><div class="metadata-label">Confidence:</div><div class="metadata-value"><span class="confidence-${e.confidence}">${e.confidence.toUpperCase()}</span></div></div>${e.notes?`<div class="metadata-notes">${e.notes}</div>`:''}</div>`;
+}
+rDiscussion(){
+return`<div class="intro"><h1>Discussion Terminal</h1><p>Shared notes, anomalies, and timecodes. System time synced.</p></div><div class="chat-container"><div class="chat-log" id="chat-log"></div></div><div class="chat-input-area"><input type="text" id="chat-input" placeholder="Enter message..." maxlength="200"><button id="chat-send">Send</button></div><div class="newsletter-form">
+<h2>Archive Updates</h2>
+<form id="newsletter-form" action="https://formspree.io/f/xeeeorzj" method="POST">
+<input type="text" name="name" placeholder="Name" required>
+<input type="email" name="email" placeholder="Email" required>
+<button type="submit">Subscribe</button>
+<div class="privacy">Updates only. No spam. Unsubscribe anytime.</div>
+<div class="message" id="form-message"></div>
+</form>
+</div>`;
+}
+renderChat(){
+const c=document.getElementById('chat-log');
+if(!c)return;
+c.innerHTML=this.chatMessages.map(m=>`<div class="chat-msg"><span class="chat-timestamp">[${m.time}]</span><span class="${m.isBot?'chat-bot':'chat-user'}">${m.user}</span><span class="chat-location">${m.location}</span>: ${m.text}</div>`).join('');
+}
+attachChatInput(){
+const input=document.getElementById('chat-input');
+const btn=document.getElementById('chat-send');
+const send=()=>{
+const msg=input.value.trim();
+if(msg){
+const now=new Date();
+const time=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+this.chatMessages.push({user:'visitor',location:'Location Unknown',text:msg,time,isBot:false});
+input.value='';
+this.renderChat();
+setTimeout(()=>{
+const randomBot=this.chatBots[Math.floor(Math.random()*this.chatBots.length)];
+const randomResponse=this.visitorResponses[Math.floor(Math.random()*this.visitorResponses.length)];
+const now2=new Date();
+const time2 = `${String(now2.getHours()).padStart(2,'0')}:${String(now2.getMinutes()).padStart(2,'0')}`;
+this.chatMessages.push({user:randomBot.name,location:randomBot.location,text:randomResponse,time:time2,isBot:true});
+this.renderChat();
+},Math.random()*8000+3000);
+}
+};
+if(btn)btn.onclick=send;
+if(input)input.onkeypress=e=>{if(e.key==='Enter')send()};
+}
+rAbout(){
+return `<div class="intro">
+  <h1>About</h1>
+  <p>WLSN surfaced sporadically across the FM band in rural California, 1967–1969. The recordings that survived were digitized in 2024 and labeled <em>Color Radio from Space</em>.</p>
+  <p>This archive catalogs identifiable music, voices, and fragments embedded in the transmissions. Some sources remain unconfirmed.</p>
+</div>`; 
+}
+attachLinks(){
+document.querySelectorAll('[data-link]').forEach(el=>el.onclick=()=>window.location.hash=el.dataset.link);
+}
+attachFilters(){
+const tf=document.getElementById('type-filter'),sf=document.getElementById('search-filter'),so=document.getElementById('sort-filter');
+if(tf)tf.onchange=e=>{this.filter.type=e.target.value;this.updateElementsTable()};
+if(sf)sf.oninput=e=>{this.filter.search=e.target.value;this.updateElementsTable()};
+if(so)so.onchange=e=>{this.filter.sort=e.target.value;this.updateElementsTable()};
+}
+attachNewsletter(){
+const form=document.getElementById('newsletter-form');
+if(form){
+form.onsubmit=async(e)=>{
+e.preventDefault();
+const msg=document.getElementById('form-message');
+try{
+const res=await fetch(form.action,{method:'POST',body:new FormData(form),headers:{'Accept':'application/json'}});
+if(res.ok){
+msg.textContent='Subscribed successfully!';
+msg.className='message success';
+msg.style.display='block';
+form.reset();
+}else{
+msg.textContent='Error. Please try again.';
+msg.className='message error';
+msg.style.display='block';
+}
+
+
+  attachTransmissionFilters(els){
+    const search=document.getElementById('trans-search');
+    const typeSel=document.getElementById('trans-type');
+    const table=document.querySelector('.breakdown-table');
+    if(!search||!typeSel||!table) return;
+
+    const types=new Set();
+    (els||[]).forEach(e=>{ if(e && e.type) types.add(e.type); });
+    typeSel.innerHTML='';
+    const allOpt=document.createElement('option');
+    allOpt.value='';
+    allOpt.textContent='ALL TYPES';
+    typeSel.appendChild(allOpt);
+    Array.from(types).sort().forEach(t=>{
+      const o=document.createElement('option');
+      o.value=t;
+      o.textContent=String(t).toUpperCase();
+      typeSel.appendChild(o);
+    });
+
+    const rows=Array.from(table.querySelectorAll('tbody tr'));
+
+    const apply=()=>{
+      const q=(search.value||'').trim().toLowerCase();
+      const t=(typeSel.value||'').trim().toLowerCase();
+      rows.forEach(r=>{
+        const txt=r.textContent.toLowerCase();
+        const rt=(r.querySelector('.type-badge')?.textContent||'').toLowerCase();
+        const okQ=!q || txt.includes(q);
+        const okT=!t || rt==t;
+        r.style.display=(okQ && okT)?'':'none';
+      });
+    };
+
+    search.addEventListener('input', apply);
+    typeSel.addEventListener('change', apply);
+    apply();
+  }
+}catch(err){
+msg.textContent='Error. Please try again.';
+msg.className='message error';
+msg.style.display='block';
+}
+};
+}
+}
+initAudioPlayer(){
+const audio=document.getElementById('audio-element');
+const playBtn=document.getElementById('play-btn');
+const timeDisplay=document.getElementById('time-display');
+const timeline=document.getElementById('timeline');
+const timelineProgress=document.getElementById('timeline-progress');
+const timelineHandle=document.getElementById('timeline-handle');
+const volumeSlider=document.getElementById('volume-slider');
+const volumeLevel=document.getElementById('volume-level');
+
+if(!audio)return;
+
+const formatTime=(seconds)=>{
+const m=Math.floor(seconds/60);
+const s=Math.floor(seconds%60);
+return`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+};
+
+playBtn.onclick=()=>{
+if(audio.paused){
+audio.play();
+playBtn.textContent='❚❚';
+}else{
+audio.pause();
+playBtn.textContent='▶';
+}
+};
+
+audio.ontimeupdate=()=>{
+if(!audio.duration||Number.isNaN(audio.duration))return;
+const percent=(audio.currentTime/audio.duration)*100;
+timelineProgress.style.width=percent+'%';
+timelineHandle.style.left=percent+'%';
+timeDisplay.textContent=`${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+};
+
+audio.onloadedmetadata=()=>{
+if(!audio.duration||Number.isNaN(audio.duration))return;
+timeDisplay.textContent=`00:00 / ${formatTime(audio.duration)}`;
+};
+
+timeline.onclick=(e)=>{
+if(!audio.duration||Number.isNaN(audio.duration))return;
+const rect=timeline.getBoundingClientRect();
+const percent=(e.clientX-rect.left)/rect.width;
+audio.currentTime=Math.max(0,Math.min(audio.duration,percent*audio.duration));
+};
+
+volumeSlider.onclick=(e)=>{
+const rect=volumeSlider.getBoundingClientRect();
+const percent=(e.clientX-rect.left)/rect.width;
+audio.volume=Math.max(0,Math.min(1,percent));
+volumeLevel.style.width=(audio.volume*100)+'%';
+};
+}
+
+
+}
+new App();
+</script>
+</body>
+</html>
+```
