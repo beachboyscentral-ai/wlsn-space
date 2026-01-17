@@ -10,6 +10,9 @@
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
 
+  <!-- Optional (later): RSS feed for podcatchers -->
+  <!-- <link rel="alternate" type="application/rss+xml" title="WLSN Broadcast Archive" href="feed.xml"> -->
+
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     :root{
@@ -41,7 +44,6 @@
       );
       pointer-events:none;
       z-index:9999;
-      mix-blend-mode:normal;
       opacity:0.9;
     }
 
@@ -91,7 +93,7 @@
       filter: blur(1.15px);
     }
 
-    /* Session indicator is its own panel, not part of nav banner */
+    /* Session indicator is its own panel */
     .session-panel{
       margin-top:14px;
       border:1px solid var(--crt-dim);
@@ -118,6 +120,7 @@
     /* Sitewide button rule:
        - default: black fill + green outline
        - hover: green fill + glow
+       - active (current page): subtle green tint + glow, still readable at a glance
     */
     .btn,
     .btn:visited,
@@ -145,7 +148,7 @@
     }
 
     nav a.active{
-      opacity:1;
+      background:rgba(40,212,40,0.14);
       box-shadow:0 0 14px rgba(0,255,102,0.18);
     }
 
@@ -154,9 +157,6 @@
       text-align:center;
       min-width:200px;
     }
-
-    /* remove old hover-highlighting on large boxes */
-    .no-card-hover:hover{background:transparent !important}
 
     .intro{
       border:1px solid var(--crt-dim);
@@ -486,7 +486,7 @@
     @media (max-width: 640px){
       .container{padding:20px 12px}
       .logo{font-size:24px}
-      .logo .cursor{font-size:16px;top:-3px}
+      .logo .cursor{font-size:14px;top:-3px}
 
       nav{gap:8px}
       nav a{padding:12px 10px;font-size:9px}
@@ -527,7 +527,7 @@
     #session-overlay.active{display:flex}
 
     .session-window{
-      width:min(540px,100%);
+      width:min(460px,100%);
       border:1px solid var(--crt-dim);
       background:rgba(0,0,0,0.55);
       box-shadow:0 0 40px rgba(0,255,80,0.12);
@@ -555,16 +555,8 @@
       font-size:12px;
       letter-spacing:3px;
       text-transform:uppercase;
-      margin-bottom:10px;
-      opacity:0.95;
-    }
-    .session-meta{
-      position:relative;
-      text-align:center;
-      font-size:10px;
-      color:var(--crt-dim);
-      letter-spacing:2px;
       margin-bottom:16px;
+      opacity:0.95;
       filter: blur(0.35px);
     }
 
@@ -585,7 +577,7 @@
     }
 
     .session-input{
-      width:min(420px,100%);
+      width:min(320px,100%);
       border:1px solid var(--crt-green);
       background:rgba(0,0,0,0.40);
       color:var(--crt-green);
@@ -605,38 +597,27 @@
       margin-top:16px;
     }
 
-    .session-note{
-      position:relative;
-      margin-top:14px;
+    .session-actions .btn{
+      width:min(320px,100%);
       text-align:center;
-      font-size:10px;
-      color:var(--crt-dim);
-      opacity:0.78;
-      line-height:1.6;
-      filter: blur(0.25px);
     }
   </style>
 </head>
 
 <body>
 
-  <!-- Session gate (centered, no explicit anonymous option) -->
+  <!-- Session gate (centered, no explainer copy, no session id shown, no anonymous option) -->
   <div id="session-overlay" aria-hidden="true">
     <div class="session-window">
       <div class="session-title">WLSN SIGNAL ARCHIVE TERMINAL</div>
-      <div class="session-meta">SESSION ID: <span id="session-id"></span></div>
 
       <div class="session-row">
-        <label for="alias-input">ENTER CALLSIGN</label>
-        <input id="alias-input" class="session-input" maxlength="18" autocomplete="off" spellcheck="false" placeholder="TYPE HERE">
+        <label for="alias-input">IDENTIFY YOURSELF</label>
+        <input id="alias-input" class="session-input" maxlength="18" autocomplete="off" spellcheck="false" placeholder="YOUR NAME">
       </div>
 
       <div class="session-actions">
-        <button id="enter-btn" class="btn" type="button">ENTER ARCHIVE</button>
-      </div>
-
-      <div class="session-note">
-        Local to this visit. No accounts. No tracking. Nothing persists beyond this session.
+        <button id="enter-btn" class="btn" type="button">ENTER</button>
       </div>
     </div>
   </div>
@@ -664,7 +645,6 @@
   </div>
 
   <script>
-    /* Data (unchanged content, just routed differently) */
     const D = {
       transmissions: [
         {
@@ -749,6 +729,8 @@
         this.chatMessages = [];
         this.chatScrollPos = 0;
         this._sessionTimer = null;
+        this._slideshowTimer = null;
+        this.chatInterval = null;
 
         this.chatBots = [
           {name:'djmoondust',location:'Portland, OR'},
@@ -759,7 +741,6 @@
           {name:'reel_to_reel',location:'Berlin, DE'}
         ];
 
-        /* Keep modern slang out */
         this.botMessages = [
           {bot:1,text:"001: anyone else catch the dip right after the ident? feels like the deck grabbed.",reply:true},
           {bot:3,text:"003 opens with a clean weather tag, but the noise floor feels off for an aircheck."},
@@ -776,669 +757,4 @@
           {bot:1,text:"003: the word 'network' pops once, then disappears. too clean to be accidental."},
           {bot:3,text:"That word sits on top of the hiss, not inside it."},
           {bot:0,text:"Reminder: tag artifacts separately from tracks. this is not a playlist.",reply:true},
-          {bot:4,text:"Recurring artifacts feel more intentional than the tracks themselves."},
-          {bot:2,text:"New guess: transmitter testing a collage rig.",reply:true},
-          {bot:5,text:"Whatever it is, the edits are confident. whoever did this knew radio."}
-        ];
-
-        this.visitorResponses = [
-          "timestamp?",
-          "good ear",
-          "not convinced",
-          "that feels like deck noise",
-          "any source for that?",
-          "clip it and post timecode",
-          "could be adjacent-channel bleed",
-          "same artifact shows up in 003",
-          "i hear it now",
-          "wild if true",
-          "might be speed drift",
-          "that jingle is familiar",
-          "post your notes",
-          "does anyone have the reel box scan?",
-          "why is that so clean",
-          "this is getting weird",
-          "new theory: private transmitter",
-          "headphones recommended",
-          "catalog it as an artifact",
-          "save that for the next pass"
-        ];
-
-        this.init();
-      }
-
-      init(){
-        this.initSessionGate();
-        window.addEventListener('hashchange',()=>this.route());
-        this.route();
-        this.initChat();
-      }
-
-      /* Default landing: transmissions */
-      route(){
-        const raw = (window.location.hash || '#transmissions').slice(1);
-        const parts = raw.split('/');
-        const page = parts[0] || 'transmissions';
-        const id = parts[1];
-
-        this.render(page, id);
-
-        // nav active
-        const navLinks = document.querySelectorAll('nav a');
-        navLinks.forEach(a=>{
-          const href = (a.getAttribute('href')||'').replace('#','');
-          a.classList.toggle('active', href === page);
-        });
-
-        this.updateSessionIndicator();
-      }
-
-      initSessionGate(){
-        const existingUser = sessionStorage.getItem('wlsn_user');
-        const existingSession = sessionStorage.getItem('wlsn_session');
-        const existingStart = sessionStorage.getItem('wlsn_start');
-
-        if(existingUser && existingSession && existingStart){
-          this.updateSessionIndicator();
-          return;
-        }
-
-        const overlay = document.getElementById('session-overlay');
-        const idEl = document.getElementById('session-id');
-        const nameEl = document.getElementById('alias-input');
-        const enterBtn = document.getElementById('enter-btn');
-
-        if(!overlay || !idEl || !nameEl || !enterBtn) return;
-
-        const genId = ()=>{
-          const a = Math.random().toString(36).slice(2,8).toUpperCase();
-          const b = Math.random().toString(36).slice(2,6).toUpperCase();
-          return (a+b).slice(0,10);
-        };
-
-        const genCallsign = ()=>{
-          // alphanumeric, not WLSN
-          const s = Math.random().toString(36).slice(2,10).toUpperCase();
-          return ("USER_"+s.slice(0,6)).replace(/[^A-Z0-9_]/g,'');
-        };
-
-        const sessionId = genId();
-        idEl.textContent = sessionId;
-
-        const activate = ()=>{
-          overlay.classList.add('active');
-          overlay.setAttribute('aria-hidden','false');
-          document.documentElement.style.overflow='hidden';
-          setTimeout(()=>nameEl.focus(),60);
-        };
-
-        const commit = ()=>{
-          let safe = (nameEl.value||'').trim().replace(/[^a-zA-Z0-9 _-]/g,'').slice(0,18);
-          safe = safe.toUpperCase();
-          if(!safe) safe = genCallsign();
-
-          sessionStorage.setItem('wlsn_user', safe);
-          sessionStorage.setItem('wlsn_session', sessionId);
-          sessionStorage.setItem('wlsn_start', String(Date.now()));
-
-          overlay.classList.remove('active');
-          overlay.setAttribute('aria-hidden','true');
-          document.documentElement.style.overflow='';
-          this.updateSessionIndicator();
-        };
-
-        // force caps as they type
-        nameEl.addEventListener('input', ()=>{
-          nameEl.value = (nameEl.value || '').toUpperCase();
-        });
-
-        enterBtn.onclick = commit;
-        nameEl.addEventListener('keydown', (e)=>{
-          if(e.key === 'Enter'){ commit(); }
-        });
-
-        activate();
-      }
-
-      updateSessionIndicator(){
-        const el = document.getElementById('session-indicator');
-        if(!el) return;
-
-        const user = sessionStorage.getItem('wlsn_user') || 'USER';
-        const session = sessionStorage.getItem('wlsn_session') || '';
-        const start = parseInt(sessionStorage.getItem('wlsn_start') || '0', 10);
-
-        const fmt = (ms)=>{
-          const s = Math.max(0, parseInt(ms/1000,10));
-          const h = parseInt(s/3600,10);
-          const m = parseInt((s%3600)/60,10);
-          const ss = parseInt(s%60,10);
-          const pad = (n)=>String(n).padStart(2,'0');
-          return `${pad(h)}:${pad(m)}:${pad(ss)}`;
-        };
-
-        const render = ()=>{
-          const now = Date.now();
-          const runtime = start ? fmt(now-start) : '00:00:00';
-          el.innerHTML = `LOGGED AS <b>${user}</b>  |  SESSION <b>${session}</b>  |  UPTIME <b>${runtime}</b>`;
-        };
-
-        render();
-        if(this._sessionTimer) clearInterval(this._sessionTimer);
-        this._sessionTimer = setInterval(render, 1000);
-      }
-
-      initChat(){
-        this.shuffleArray(this.botMessages);
-        for(let i=0;i<14;i++){
-          const msg = this.botMessages[i % this.botMessages.length];
-          const bot = this.chatBots[msg.bot];
-          const now = new Date();
-          const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-          this.chatMessages.push({user:bot.name,location:bot.location,text:msg.text,time,isBot:true});
-        }
-      }
-
-      shuffleArray(arr){
-        for(let i=arr.length-1;i>0;i--){
-          const j=Math.floor(Math.random()*(i+1));
-          [arr[i],arr[j]]=[arr[j],arr[i]];
-        }
-      }
-
-      startChatScroll(){
-        if(this.chatInterval) clearInterval(this.chatInterval);
-        this.chatInterval=setInterval(()=>{
-          if(window.location.hash.includes('info')){
-            const container = document.querySelector('.chat-log');
-            if(container){
-              const lineHeight = parseFloat(getComputedStyle(container).lineHeight);
-              this.chatScrollPos -= lineHeight;
-              container.style.transform = `translateY(${this.chatScrollPos}px)`;
-
-              if(Math.abs(this.chatScrollPos) > container.offsetHeight){
-                const msgIdx = this.chatMessages.length % this.botMessages.length;
-                const msg = this.botMessages[msgIdx];
-                const bot = this.chatBots[msg.bot];
-                const now = new Date();
-                const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-                this.chatMessages.push({user:bot.name,location:bot.location,text:msg.text,time,isBot:true});
-                this.renderChat();
-                this.chatScrollPos = 0;
-              }
-            }
-          }
-        }, 10000);
-      }
-
-      render(page, id){
-        const app = document.getElementById('app');
-        if(!app) return;
-
-        if(page === 'transmissions'){
-          app.innerHTML = this.rTransmissions();
-          this.attachLinks();
-        } else if(page === 'transmission'){
-          app.innerHTML = this.rTransmission(id);
-          this.attachLinks();
-          this.initAudioPlayer();
-          this.initTransmissionFilters(id);
-        } else if(page === 'element'){
-          app.innerHTML = this.rElement(id);
-          this.attachLinks();
-        } else if(page === 'info'){
-          app.innerHTML = this.rInfo();
-          this.renderChat();
-          this.startChatScroll();
-          this.attachChatInput();
-          this.attachNewsletter();
-          this.initSlideshow();
-        } else {
-          window.location.hash = '#transmissions';
-        }
-      }
-
-      rTransmissions(){
-        return `
-          <div class="feature">
-            <div class="feature-title">Broadcast Archive</div>
-            <p>Recovered transmissions. Digitized from degraded analog sources.</p>
-          </div>
-
-          <div class="grid">
-            ${this.data.transmissions.map(t=>`
-              <div class="card" data-link="transmission/${t.id}">
-                <div class="card-id">TRANSMISSION ${t.id}</div>
-                <div class="card-title">${t.title}</div>
-                <div class="card-date">${t.dateFormatted}</div>
-                <div class="card-desc">${t.description}</div>
-              </div>
-            `).join('')}
-          </div>
-        `;
-      }
-
-      rTransmission(id){
-        const t = this.data.transmissions.find(x=>x.id===id);
-        if(!t) return `<p>Not found.</p>`;
-
-        const els = this.data.elements.filter(e=>t.elements.includes(e.id));
-        return `
-          <a href="#transmissions" class="back-link">Back to Broadcast Archive</a>
-
-          <div class="transmission-header">
-            <div class="transmission-id">TRANSMISSION ${t.id}</div>
-            <h1 class="transmission-title">${t.title}</h1>
-            <div class="transmission-date">RECORDED: ${t.dateFormatted}</div>
-            <div class="badge received">RECEIVED</div>
-            <div style="margin-top:12px;opacity:0.82;line-height:1.7">${t.description}</div>
-          </div>
-
-          <div class="audio-player">
-            <div class="audio-controls">
-              <button class="play-btn" id="play-btn" ${t.audioUrl ? '' : 'disabled'}>${t.audioUrl ? '▶' : '|'}</button>
-              <div class="time-display" id="time-display">${t.audioUrl ? '00:00 / 00:00' : 'NO AUDIO / 00:00'}</div>
-
-              <div class="timeline" id="timeline" style="${t.audioUrl ? '' : 'opacity:0.35; pointer-events:none;'}">
-                <div class="timeline-progress" id="timeline-progress"></div>
-                <div class="timeline-handle" id="timeline-handle"></div>
-              </div>
-
-              <div class="volume-control" style="${t.audioUrl ? '' : 'opacity:0.35; pointer-events:none;'}">
-                <span class="volume-icon">VOL</span>
-                <div class="volume-slider" id="volume-slider">
-                  <div class="volume-level" id="volume-level"></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="track-info">TRANSMISSION ${t.id} // ${t.dateFormatted} // SOURCE: REEL-TO-REEL ${t.audioUrl ? '' : '// FILE PENDING'}</div>
-            <audio id="audio-element" ${t.audioUrl ? `src="${t.audioUrl}"` : ''} preload="metadata"></audio>
-          </div>
-
-          <div class="transmission-filters">
-            <input id="trans-filter-search" type="text" placeholder="Filter elements...">
-            <select id="trans-filter-type"></select>
-          </div>
-
-          <table class="breakdown-table">
-            <thead>
-              <tr>
-                <th>TIME</th><th>TYPE</th><th>TITLE</th><th>CREDIT</th><th>CONF.</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${els.map(e=>`
-                <tr class="el-row" data-type="${e.type}">
-                  <td>${e.start_time}${e.end_time?'-'+e.end_time:''}</td>
-                  <td><span class="type-badge">${e.type}</span></td>
-                  <td><a href="#element/${e.id}" class="element-link">${e.title}</a></td>
-                  <td>${e.primary_credit||'-'}</td>
-                  <td class="confidence-${e.confidence}">${String(e.confidence).toUpperCase()}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-
-          <div class="section">
-            <div class="section-title">Archival Notes</div>
-            <p style="opacity:0.82;line-height:1.8">${t.notes}</p>
-          </div>
-        `;
-      }
-
-      rElement(id){
-        const e = this.data.elements.find(x=>x.id===id);
-        if(!e) return `<p>Not found.</p>`;
-        const t = this.data.transmissions.find(x=>x.id===e.transmission_id);
-
-        return `
-          <a href="#transmissions" class="back-link">Back to Broadcast Archive</a>
-
-          <div class="transmission-header">
-            <div class="transmission-id">ELEMENT DOSSIER // ${e.id.toUpperCase()} // ${e.type.toUpperCase()}</div>
-            <h1 class="transmission-title">${e.title}</h1>
-            <div class="transmission-date">IN: TRANSMISSION ${t ? t.id : '?'} // ${t ? t.title : ''}</div>
-            <div class="badge archived">ARCHIVED</div>
-          </div>
-
-          <div class="section">
-            <div class="section-title">Metadata</div>
-            <p><span style="color:var(--crt-dim)">TIME:</span> <b style="color:var(--crt-green)">${e.start_time}${e.end_time?' - '+e.end_time:''}</b></p>
-            <p><span style="color:var(--crt-dim)">CREDIT:</span> <b style="color:var(--crt-green)">${e.primary_credit || 'Unknown'}</b></p>
-            <p><span style="color:var(--crt-dim)">SOURCE:</span> <b style="color:var(--crt-green)">${e.source || 'Unknown'}</b></p>
-            <p><span style="color:var(--crt-dim)">YEAR:</span> <b style="color:var(--crt-green)">${e.year || 'Unknown'}</b></p>
-            <p><span style="color:var(--crt-dim)">CONFIDENCE:</span> <span class="confidence-${e.confidence}">${String(e.confidence).toUpperCase()}</span></p>
-          </div>
-
-          ${e.notes ? `
-          <div class="section">
-            <div class="section-title">Notes</div>
-            <p style="opacity:0.82;line-height:1.8">${e.notes}</p>
-          </div>` : ``}
-        `;
-      }
-
-      rInfo(){
-        return `
-          <div class="intro">
-            <h1>Info</h1>
-            <p>Recovered broadcasts logged as transmissions. Identifiable tracks and fragments are cataloged as elements. Some sources remain unconfirmed.</p>
-            <p style="margin-bottom:0">Leave notes if you catch a mismatch, an alternate cut, a splice point, or a recurring artifact.</p>
-          </div>
-
-          <div class="info-grid">
-            <div>
-              <div class="section">
-                <div class="section-title">Discussion Terminal</div>
-                <div class="chat-container">
-                  <div class="chat-log" id="chat-log"></div>
-                </div>
-
-                <div class="chat-input-area">
-                  <input type="text" id="chat-input" placeholder="Enter message..." maxlength="200">
-                  <button id="chat-send" class="btn" type="button">Send</button>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <div class="newsletter-form">
-                <h2>Archive Updates</h2>
-                <div class="subcopy">Be alerted when new signals are digitized and added to the archive.</div>
-                <form id="newsletter-form" action="https://formspree.io/f/xeeeorzj" method="POST">
-                  <input type="text" name="name" placeholder="Name" required>
-                  <input type="email" name="email" placeholder="Email" required>
-                  <button type="submit" class="btn">Subscribe</button>
-                  <div class="privacy">Updates only. No spam. Unsubscribe anytime.</div>
-                  <div class="message" id="form-message"></div>
-                </form>
-              </div>
-
-              <div class="slideshow-box">
-                <div class="section-title" style="margin-bottom:12px">Field Images</div>
-                <div class="slideshow-stage" id="slideshow-stage" aria-label="Image slideshow">
-                  <img id="slide-a" alt="">
-                  <img id="slide-b" alt="">
-                  <div class="slideshow-caption" id="slide-caption">LOADING...</div>
-                </div>
-                <div style="margin-top:10px;font-size:10px;color:var(--crt-dim);opacity:0.75;line-height:1.6">
-                  Reads <b style="color:var(--crt-green)">slideshow/manifest.json</b>. Images live in <b style="color:var(--crt-green)">/slideshow/</b>.
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-      }
-
-      renderChat(){
-        const c = document.getElementById('chat-log');
-        if(!c) return;
-
-        c.innerHTML = this.chatMessages.map(m=>`
-          <div class="chat-msg">
-            <span class="chat-timestamp">[${m.time}]</span>
-            <span class="${m.isBot ? 'chat-bot' : 'chat-user'}">${m.user}</span>
-            <span class="chat-location">${m.location}</span>:
-            ${m.text}
-          </div>
-        `).join('');
-      }
-
-      attachChatInput(){
-        const input = document.getElementById('chat-input');
-        const btn = document.getElementById('chat-send');
-
-        const send = ()=>{
-          const msg = (input.value||'').trim();
-          if(!msg) return;
-
-          const user = sessionStorage.getItem('wlsn_user') || 'USER';
-          const now = new Date();
-          const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-
-          this.chatMessages.push({user:user,location:'',text:msg,time,isBot:false});
-          input.value='';
-          this.renderChat();
-
-          setTimeout(()=>{
-            const randomBot = this.chatBots[Math.floor(Math.random()*this.chatBots.length)];
-            const randomResponse = this.visitorResponses[Math.floor(Math.random()*this.visitorResponses.length)];
-            const now2 = new Date();
-            const time2 = `${String(now2.getHours()).padStart(2,'0')}:${String(now2.getMinutes()).padStart(2,'0')}`;
-            this.chatMessages.push({user:randomBot.name,location:randomBot.location,text:randomResponse,time:time2,isBot:true});
-            this.renderChat();
-          }, Math.random()*7000 + 2500);
-        };
-
-        if(btn) btn.onclick = send;
-        if(input) input.onkeypress = (e)=>{ if(e.key==='Enter'){ send(); } };
-      }
-
-      attachNewsletter(){
-        const form = document.getElementById('newsletter-form');
-        if(!form) return;
-
-        form.onsubmit = async (e)=>{
-          e.preventDefault();
-          const msg = document.getElementById('form-message');
-          if(!msg) return;
-
-          try{
-            const res = await fetch(form.action, {
-              method:'POST',
-              body:new FormData(form),
-              headers:{'Accept':'application/json'}
-            });
-
-            if(res.ok){
-              msg.textContent = 'Subscribed successfully!';
-              msg.className = 'message success';
-              msg.style.display = 'block';
-              form.reset();
-            } else {
-              msg.textContent = 'Error. Please try again.';
-              msg.className = 'message error';
-              msg.style.display = 'block';
-            }
-          } catch(err){
-            msg.textContent = 'Error. Please try again.';
-            msg.className = 'message error';
-            msg.style.display = 'block';
-          }
-        };
-      }
-
-      attachLinks(){
-        document.querySelectorAll('[data-link]').forEach(el=>{
-          el.onclick = ()=>{ window.location.hash = el.dataset.link; };
-        });
-      }
-
-      initTransmissionFilters(id){
-        const t = this.data.transmissions.find(x=>x.id===id);
-        const els = t ? this.data.elements.filter(e=>t.elements.includes(e.id)) : [];
-
-        const search = document.getElementById('trans-filter-search');
-        const typeSel = document.getElementById('trans-filter-type');
-        const table = document.querySelector('.breakdown-table');
-        if(!search || !typeSel || !table) return;
-
-        const types = new Set();
-        els.forEach(e=>{ if(e && e.type) types.add(e.type); });
-
-        typeSel.innerHTML = '';
-        const allOpt = document.createElement('option');
-        allOpt.value = 'all';
-        allOpt.textContent = 'ALL TYPES';
-        typeSel.appendChild(allOpt);
-
-        Array.from(types).sort().forEach(t=>{
-          const o=document.createElement('option');
-          o.value=t;
-          o.textContent=String(t).toUpperCase();
-          typeSel.appendChild(o);
-        });
-
-        const rows = Array.from(table.querySelectorAll('tbody tr'));
-
-        const apply = ()=>{
-          const q = (search.value||'').trim().toLowerCase();
-          const tval = (typeSel.value||'all').trim().toLowerCase();
-
-          rows.forEach(r=>{
-            const txt = r.textContent.toLowerCase();
-            const rt = (r.getAttribute('data-type')||'').toLowerCase();
-            const okQ = !q || txt.includes(q);
-            const okT = (tval === 'all') || rt === tval;
-            r.style.display = (okQ && okT) ? '' : 'none';
-          });
-        };
-
-        search.addEventListener('input', apply);
-        typeSel.addEventListener('change', apply);
-        apply();
-      }
-
-      initAudioPlayer(){
-        const audio = document.getElementById('audio-element');
-        const playBtn = document.getElementById('play-btn');
-        const timeDisplay = document.getElementById('time-display');
-        const timeline = document.getElementById('timeline');
-        const timelineProgress = document.getElementById('timeline-progress');
-        const timelineHandle = document.getElementById('timeline-handle');
-        const volumeSlider = document.getElementById('volume-slider');
-        const volumeLevel = document.getElementById('volume-level');
-
-        if(!audio || !playBtn || !timeDisplay || !timeline || !timelineProgress || !timelineHandle || !volumeSlider || !volumeLevel) return;
-
-        const formatTime = (seconds)=>{
-          const m = Math.floor(seconds/60);
-          const s = Math.floor(seconds%60);
-          return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-        };
-
-        playBtn.onclick = ()=>{
-          if(audio.paused){
-            audio.play();
-            playBtn.textContent='❚❚';
-          } else {
-            audio.pause();
-            playBtn.textContent='▶';
-          }
-        };
-
-        audio.ontimeupdate = ()=>{
-          if(!audio.duration || Number.isNaN(audio.duration)) return;
-          const percent = (audio.currentTime/audio.duration)*100;
-          timelineProgress.style.width = percent + '%';
-          timelineHandle.style.left = percent + '%';
-          timeDisplay.textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
-        };
-
-        audio.onloadedmetadata = ()=>{
-          if(!audio.duration || Number.isNaN(audio.duration)) return;
-          timeDisplay.textContent = `00:00 / ${formatTime(audio.duration)}`;
-        };
-
-        timeline.onclick = (e)=>{
-          if(!audio.duration || Number.isNaN(audio.duration)) return;
-          const rect = timeline.getBoundingClientRect();
-          const percent = (e.clientX - rect.left) / rect.width;
-          audio.currentTime = Math.max(0, Math.min(audio.duration, percent*audio.duration));
-        };
-
-        volumeSlider.onclick = (e)=>{
-          const rect = volumeSlider.getBoundingClientRect();
-          const percent = (e.clientX - rect.left) / rect.width;
-          audio.volume = Math.max(0, Math.min(1, percent));
-          volumeLevel.style.width = (audio.volume*100) + '%';
-        };
-      }
-
-      /* Slideshow: reads slideshow/manifest.json */
-      async initSlideshow(){
-        const stage = document.getElementById('slideshow-stage');
-        const a = document.getElementById('slide-a');
-        const b = document.getElementById('slide-b');
-        const cap = document.getElementById('slide-caption');
-        if(!stage || !a || !b || !cap) return;
-
-        const manifestUrl = 'slideshow/manifest.json';
-
-        let files = [];
-        try{
-          const res = await fetch(manifestUrl, {cache:'no-store'});
-          if(!res.ok) throw new Error('manifest fetch failed');
-          files = await res.json();
-          if(!Array.isArray(files)) throw new Error('manifest not array');
-          files = files.filter(Boolean).map(String);
-        } catch(err){
-          cap.textContent = 'MANIFEST NOT FOUND';
-          return;
-        }
-
-        if(!files.length){
-          cap.textContent = 'NO IMAGES LISTED';
-          return;
-        }
-
-        // Preload
-        const toUrl = (name)=> 'slideshow/' + encodeURI(name);
-
-        let idx = 0;
-        let showA = true;
-
-        const setCaption = (name)=>{
-          const clean = name.replace(/\.[^/.]+$/, '');
-          cap.textContent = clean.toUpperCase();
-        };
-
-        const show = (imgEl, name)=>{
-          return new Promise((resolve)=>{
-            imgEl.onload = ()=>resolve(true);
-            imgEl.onerror = ()=>resolve(false);
-            imgEl.src = toUrl(name);
-            imgEl.alt = name;
-          });
-        };
-
-        // First image
-        const ok0 = await show(a, files[0]);
-        a.classList.add('active');
-        b.classList.remove('active');
-        setCaption(files[0]);
-
-        if(!ok0){
-          cap.textContent = 'IMAGE LOAD ERROR';
-        }
-
-        const cycle = async ()=>{
-          idx = (idx + 1) % files.length;
-          const nextName = files[idx];
-
-          const front = showA ? b : a;
-          const back  = showA ? a : b;
-
-          const ok = await show(front, nextName);
-          if(!ok){
-            cap.textContent = 'IMAGE LOAD ERROR';
-            return;
-          }
-
-          back.classList.remove('active');
-          front.classList.add('active');
-          setCaption(nextName);
-          showA = !showA;
-        };
-
-        // Slow cycle
-        if(this._slideshowTimer) clearInterval(this._slideshowTimer);
-        this._slideshowTimer = setInterval(cycle, 9000);
-      }
-    }
-
-    new App();
-  </script>
-</body>
-</html>
+          {bot:4,text:"
