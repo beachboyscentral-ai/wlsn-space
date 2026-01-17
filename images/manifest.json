@@ -1,0 +1,6 @@
+this.slides = [
+  {
+    src: "images/wlsn-01.jpg",
+    caption: "Recovered reel-to-reel recordings discovered in 2024"
+  }
+];
