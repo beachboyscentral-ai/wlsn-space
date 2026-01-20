@@ -5,9 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>WLSN | Western Light and Sound Network</title>
 
+  <!-- Favicons (keep these files in your site root) -->
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+  <!-- Optional (later): RSS feed for podcatchers -->
+  <!-- <link rel="alternate" type="application/rss+xml" title="WLSN Broadcast Archive" href="feed.xml"> -->
 
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
@@ -17,13 +21,6 @@
       --crt-bg:#0b110b;
       --crt-glow:rgba(40,212,40,0.55);
       --mono:'Courier New',monospace;
-
-      /* NAV GLOW TUNING (edit these) */
-      --nav-pulse-dur: 2.6s;
-      --nav-glow-a: 0.16;
-      --nav-glow-b: 0.28;
-      --nav-glow-a2: 0.10;
-      --nav-glow-b2: 0.16;
     }
 
     body{
@@ -40,14 +37,14 @@
       position:fixed;top:0;left:0;width:100%;height:100%;
       background:repeating-linear-gradient(
         0deg,
-        rgba(0,0,0,0.12) 0px,
-        rgba(0,0,0,0.12) 1px,
+        rgba(0,0,0,0.16) 0px,
+        rgba(0,0,0,0.16) 1px,
         transparent 1px,
         transparent 2px
       );
       pointer-events:none;
       z-index:9999;
-      opacity:0.88;
+      opacity:0.9;
     }
 
     .container{max-width:1000px;margin:0 auto;padding:40px 20px}
@@ -68,13 +65,14 @@
       line-height:1.1;
     }
 
+    /* Cursor sizing and alignment */
     .logo .cursor{
       font-size:22px;
       line-height:1;
       display:inline-block;
       vertical-align:baseline;
       margin-left:8px;
-      animation:blink 1.6s infinite;
+      animation:blink 1s infinite;
       position:relative;
       top:-5px;
       opacity:0.95;
@@ -88,12 +86,14 @@
       opacity:0.75;
     }
 
+    /* Make "Signal Archive" slightly blurrier */
     .tagline-sub{
       margin-top:2px;
       opacity:0.62;
       filter: blur(1.15px);
     }
 
+    /* Session indicator is its own panel */
     .session-panel{
       margin-top:14px;
       border:1px solid var(--crt-dim);
@@ -112,11 +112,16 @@
       padding-top:18px;
       border-top:1px solid var(--crt-dim);
       display:flex;
-      gap:6px;
+      gap:10px;
       align-items:center;
       flex-wrap:wrap;
     }
 
+    /* Sitewide button rule:
+       - default: black fill + green outline
+       - hover: green fill + glow
+       - active (current page): subtle green tint + glow, still readable at a glance
+    */
     .btn,
     .btn:visited,
     nav a,
@@ -139,28 +144,18 @@
     nav a:hover{
       background:var(--crt-green);
       color:var(--crt-bg);
-      box-shadow:0 0 14px rgba(40,212,40,0.28);
-    }
-
-    nav a{
-      text-align:center;
-      min-width:200px;
+      box-shadow:0 0 14px rgba(0,255,102,0.25);
     }
 
     nav a.active{
-      background:rgba(40,212,40,0.22);
-      position:relative;
-      animation:forceghost var(--nav-pulse-dur) ease-in-out infinite;
+      background:rgba(40,212,40,0.14);
+      box-shadow:0 0 14px rgba(0,255,102,0.18);
     }
 
-    nav a.active:hover{
-      background:rgba(40,212,40,0.22);
-      color:var(--crt-green);
-    }
-
-    @keyframes forceghost{
-      0%,100%{ box-shadow:0 0 10px rgba(0,255,102,var(--nav-glow-a)), 0 0 22px rgba(0,255,102,var(--nav-glow-a2)); }
-      50%{ box-shadow:0 0 14px rgba(0,255,102,var(--nav-glow-b)), 0 0 30px rgba(0,255,102,var(--nav-glow-b2)); }
+    /* keep nav alignment even */
+    nav a{
+      text-align:center;
+      min-width:200px;
     }
 
     .intro{
@@ -192,7 +187,7 @@
       opacity:0.7;
     }
     .back-link:hover{opacity:1}
-    .back-link::before{content:'\2190 '}
+    .back-link::before{content:'← '}
 
     .grid{display:block;margin-top:16px;border:1px solid var(--crt-dim)}
     .card{
@@ -207,6 +202,7 @@
     .card-date{font-size:10px;color:var(--crt-dim);margin-bottom:10px;opacity:0.7}
     .card-desc{font-size:13px;line-height:1.6;opacity:0.82}
 
+    /* Feature block on archive landing */
     .feature{
       border:1px solid var(--crt-dim);
       border-left:4px solid var(--crt-green);
@@ -226,6 +222,23 @@
     }
     .feature p{opacity:0.82}
 
+    /* Badges (not buttons) */
+    .badge{
+      display:inline-block;
+      padding:6px 10px;
+      border:1px dashed var(--crt-dim);
+      color:var(--crt-green);
+      background:rgba(0,0,0,0.22);
+      letter-spacing:2px;
+      font-size:10px;
+      cursor:default;
+      user-select:none;
+      opacity:0.95;
+    }
+    .badge.received{border-color:var(--crt-green)}
+    .badge.archived{border-color:var(--crt-dim);filter:blur(0.15px)}
+    .badge:hover{background:rgba(0,0,0,0.22);box-shadow:none}
+
     .transmission-header{
       border:2px solid var(--crt-green);
       padding:26px;
@@ -244,13 +257,8 @@
       background:rgba(0,0,0,0.14);
     }
     .section-title{
-      font-size:11px;
-      text-transform:uppercase;
-      letter-spacing:2px;
-      margin-bottom:14px;
-      border-bottom:1px solid var(--crt-green);
-      padding-bottom:8px;
-      font-weight:700;
+      font-size:11px;text-transform:uppercase;letter-spacing:2px;margin-bottom:14px;
+      border-bottom:1px solid var(--crt-green);padding-bottom:8px;font-weight:700
     }
 
     .breakdown-table{
@@ -262,45 +270,31 @@
     }
     .breakdown-table thead{background:rgba(51,255,51,0.08)}
     .breakdown-table th{
-      padding:10px 12px;
-      text-align:left;
-      font-weight:700;
-      letter-spacing:1.5px;
-      font-size:10px;
-      border-right:1px solid var(--crt-dim);
-      border-bottom:1px solid var(--crt-green);
-      white-space:nowrap;
+      padding:10px 12px;text-align:left;font-weight:700;letter-spacing:1.5px;font-size:10px;
+      border-right:1px solid var(--crt-dim);border-bottom:1px solid var(--crt-green)
     }
     .breakdown-table td{
-      padding:12px 12px;
-      border-bottom:1px solid var(--crt-dim);
-      border-right:1px solid var(--crt-dim);
-      overflow-wrap:anywhere;
-      word-break:break-word;
-      vertical-align:top;
+      padding:12px 12px;border-bottom:1px solid var(--crt-dim);border-right:1px solid var(--crt-dim);
+      overflow-wrap:anywhere;word-break:break-word;
     }
     .breakdown-table tbody tr:hover{background:rgba(51,255,51,0.05)}
 
+    .element-link{color:var(--crt-green);text-decoration:underline;cursor:pointer;font-weight:700}
+    .element-link:hover{color:#fff;text-shadow:0 0 10px var(--crt-glow)}
     .type-badge{display:inline-block;padding:2px 6px;font-size:9px;letter-spacing:1px;font-weight:700;text-transform:uppercase;border:1px solid var(--crt-dim);opacity:0.9}
 
     .confidence-high{color:var(--crt-green);font-weight:700}
     .confidence-medium{color:var(--crt-dim);font-weight:700}
     .confidence-low{color:#ff3333;font-weight:700}
 
+    /* Filters on transmission pages */
     .transmission-filters{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      flex-wrap:wrap;
-      margin:16px 0;
-      padding:12px;
-      border:1px solid var(--crt-dim);
-      background:rgba(0,0,0,0.22);
+      display:flex;gap:12px;align-items:center;flex-wrap:wrap;
+      margin:16px 0;padding:12px;border:1px solid var(--crt-dim);background:rgba(0,0,0,0.22);
     }
     .transmission-filters input,
     .transmission-filters select{
-      flex:1;
-      min-width:220px;
+      flex:1;min-width:220px;
       background:rgba(0,0,0,0.35);
       border:1px solid var(--crt-green);
       color:var(--crt-green);
@@ -311,6 +305,7 @@
     }
     .transmission-filters select{flex:0.65}
 
+    /* Audio player */
     .audio-player{border:1px solid var(--crt-dim);padding:16px;margin:16px 0;background:rgba(0,0,0,0.26)}
     .audio-controls{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
     .play-btn{
@@ -334,60 +329,46 @@
     .volume-level{height:100%;background:var(--crt-green);width:100%}
     .track-info{font-family:var(--mono);font-size:10px;color:var(--crt-dim);margin-top:8px;opacity:0.75}
 
-    /* INFO: hard lock the column height so chat never expands the grid */
-    .info-shell{border:1px solid var(--crt-dim);padding:18px;background:rgba(0,0,0,0.14)}
-
+    /* INFO page layout */
     .info-grid{
       display:grid;
       grid-template-columns: 1.35fr 0.95fr;
       gap:16px;
-      align-items:stretch;
-      height:720px;
-      min-height:720px;
-    }
-
-    .info-left,
-    .info-right{min-height:0;height:100%;}
-
-    .panel{border:1px solid var(--crt-dim);padding:18px;background:rgba(0,0,0,0.14)}
-    .panel .section-title{margin-top:0;}
-
-    .panel.full-height{
-      height:100%;
-      display:flex;
-      flex-direction:column;
-      min-height:0;
+      align-items:start;
     }
 
     .chat-container{
-      flex:1 1 auto;
-      min-height:0;
-      overflow:auto;
-      background:rgba(0,0,0,0.22);
       border:1px solid var(--crt-dim);
+      height:520px;
+      overflow:hidden;
+      background:rgba(0,0,0,0.28);
+      position:relative;
     }
-
-    .chat-log{padding:10px 12px;}
-
-    .chat-msg{margin-bottom:10px;line-height:1.65;}
-    .chat-timestamp{display:inline-block;min-width:44px;color:var(--crt-dim);opacity:0.9;letter-spacing:1px;}
-    .chat-user{color:var(--crt-green);font-weight:700;letter-spacing:1px;}
-    .chat-bot{color:var(--crt-green);opacity:0.95;letter-spacing:1px;}
-    .chat-location{color:var(--crt-dim);opacity:0.85;margin-left:6px;letter-spacing:1px;}
+    .chat-log{
+      font-size:11px;
+      line-height:2.2;
+      position:absolute;
+      width:calc(100% - 30px);
+      left:15px;
+      top:0;
+    }
+    .chat-msg{margin-bottom:15px}
+    .chat-user{color:var(--crt-green);font-weight:700}
+    .chat-bot{color:var(--crt-dim);font-weight:700}
+    .chat-location{color:var(--crt-dim);font-size:10px;margin-left:6px}
+    .chat-timestamp{color:var(--crt-dim);font-size:10px;margin-right:8px}
 
     .chat-input-area{
-      margin-top:14px;
-      padding:0;
-      border:0;
-      background:transparent;
+      margin-top:12px;
+      border:1px solid var(--crt-dim);
+      padding:14px;
+      background:rgba(0,0,0,0.22);
       display:flex;
       gap:12px;
       align-items:center;
     }
-
-    .panel input[type="email"],
-    .panel input[type="text"]{
-      width:100%;
+    .chat-input-area input{
+      flex:1;
       font-family:var(--mono);
       font-size:11px;
       padding:10px 12px;
@@ -396,28 +377,48 @@
       color:var(--crt-green);
       outline:none;
     }
+    .chat-input-area button{min-width:110px}
 
-    .chat-input-area input{
-      flex:1;
-      min-width:0;
-      height:42px;
+    .newsletter-form{
+      border:1px solid var(--crt-dim);
+      border-left:4px solid var(--crt-green);
+      padding:18px;
+      background:rgba(0,0,0,0.22);
     }
-
-    .chat-input-area .btn,
-    .chat-input-area button{
-      flex:0 0 180px;
-      height:42px;
-      min-width:180px;
-      text-align:center;
+    .newsletter-form h2{
+      font-size:12px;text-transform:uppercase;margin-bottom:12px;
+      border-bottom:1px solid var(--crt-green);padding-bottom:8px
     }
-
-    .stay-grid{
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-      min-height:0;
+    .newsletter-form .subcopy{
+      font-size:11px;
+      opacity:0.78;
+      margin-bottom:12px;
+      line-height:1.7;
     }
+    .newsletter-form input{
+      width:100%;
+      font-family:var(--mono);
+      font-size:11px;
+      padding:10px 12px;
+      border:1px solid var(--crt-green);
+      background:rgba(0,0,0,0.35);
+      color:var(--crt-green);
+      margin-bottom:10px;
+      outline:none;
+    }
+    .newsletter-form button{width:100%}
+    .newsletter-form .privacy{font-size:10px;margin-top:10px;opacity:0.62}
+    .newsletter-form .message{margin-top:10px;padding:10px;border:1px solid var(--crt-green);font-size:11px;display:none}
+    .newsletter-form .message.success{color:var(--crt-green)}
+    .newsletter-form .message.error{color:#ff3333;border-color:#ff3333}
 
+    /* Slideshow block */
+    .slideshow-box{
+      margin-top:16px;
+      border:1px solid var(--crt-dim);
+      background:rgba(0,0,0,0.22);
+      padding:14px;
+    }
     .slideshow-stage{
       position:relative;
       width:100%;
@@ -459,13 +460,9 @@
       color:var(--crt-green);
       font-size:10px;
       letter-spacing:1px;
-      opacity:0.65;
+      opacity:0.9;
       filter: blur(0.15px);
     }
-
-    .message{margin-top:10px;padding:10px;border:1px solid var(--crt-green);font-size:11px;display:none}
-    .message.success{color:var(--crt-green)}
-    .message.error{color:#ff3333;border-color:#ff3333}
 
     footer{
       margin-top:54px;
@@ -480,10 +477,10 @@
 
     @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
 
+    /* Mobile: no sideways scroll, tables become blocks */
     @media (max-width: 900px){
       nav a{min-width:auto;flex:1}
-      .info-grid{grid-template-columns:1fr;height:auto;min-height:0;}
-      .info-left,.info-right{height:auto;}
+      .info-grid{grid-template-columns:1fr}
     }
 
     @media (max-width: 640px){
@@ -493,9 +490,6 @@
 
       nav{gap:8px}
       nav a{padding:12px 10px;font-size:9px}
-
-      .chat-input-area .btn,
-      .chat-input-area button{flex:0 0 140px;min-width:140px;}
 
       .breakdown-table thead{display:none}
       .breakdown-table, .breakdown-table tbody, .breakdown-table tr{display:block;width:100%}
@@ -507,21 +501,20 @@
       }
       .breakdown-table td{
         display:flex;
-        gap:6px;
+        gap:10px;
         width:100%;
         padding:6px 0;
         border:0;
         align-items:flex-start;
       }
-      .breakdown-table td:nth-child(1)::before{content:"TIME"; min-width:72px; color:var(--crt-dim); letter-spacing:1px;}
-      .breakdown-table td:nth-child(2)::before{content:"TYPE"; min-width:72px; color:var(--crt-dim); letter-spacing:1px;}
-      .breakdown-table td:nth-child(3)::before{content:"TITLE"; min-width:72px; color:var(--crt-dim); letter-spacing:1px;}
-      .breakdown-table td:nth-child(4)::before{content:"CREDIT"; min-width:72px; color:var(--crt-dim); letter-spacing:1px;}
-      .breakdown-table td:nth-child(5)::before{content:"YEAR"; min-width:72px; color:var(--crt-dim); letter-spacing:1px;}
-      .breakdown-table td:nth-child(6)::before{content:"LOGGED"; min-width:72px; color:var(--crt-dim); letter-spacing:1px;}
-      .breakdown-table td:nth-child(7)::before{content:"CONF"; min-width:72px; color:var(--crt-dim); letter-spacing:1px;}
+      .breakdown-table td:nth-child(1)::before{content:"TIME"; min-width:70px; color:var(--crt-dim); letter-spacing:1px;}
+      .breakdown-table td:nth-child(2)::before{content:"TYPE"; min-width:70px; color:var(--crt-dim); letter-spacing:1px;}
+      .breakdown-table td:nth-child(3)::before{content:"TITLE"; min-width:70px; color:var(--crt-dim); letter-spacing:1px;}
+      .breakdown-table td:nth-child(4)::before{content:"CREDIT"; min-width:70px; color:var(--crt-dim); letter-spacing:1px;}
+      .breakdown-table td:nth-child(5)::before{content:"CONF"; min-width:70px; color:var(--crt-dim); letter-spacing:1px;}
     }
 
+    /* Session overlay (login) */
     #session-overlay{
       position:fixed;inset:0;
       background:rgba(0,0,0,0.90);
@@ -559,12 +552,11 @@
     .session-title{
       position:relative;
       text-align:center;
-      font-size:13px;
+      font-size:12px;
       letter-spacing:3px;
       text-transform:uppercase;
-      font-weight:700;
       margin-bottom:16px;
-      opacity:0.98;
+      opacity:0.95;
       filter: blur(0.35px);
     }
 
@@ -572,7 +564,7 @@
       position:relative;
       display:flex;
       flex-direction:column;
-      gap:6px;
+      gap:10px;
       align-items:center;
     }
 
@@ -609,200 +601,23 @@
       width:min(320px,100%);
       text-align:center;
     }
-
-    /* Artifact Modal */
-    #artifact-modal{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,0.90);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      z-index:10001;
-      padding:18px;
-    }
-    #artifact-modal.active{display:flex;}
-
-    .artifact-window{
-      width:min(720px,100%);
-      border:1px solid var(--crt-dim);
-      background:rgba(0,0,0,0.65);
-      box-shadow:0 0 40px rgba(0,255,80,0.10);
-      padding:18px;
-      position:relative;
-    }
-
-    .artifact-window::before{
-      content:'';
-      position:absolute;inset:0;
-      background:repeating-linear-gradient(
-        0deg,
-        rgba(0,0,0,0.12) 0px,
-        rgba(0,0,0,0.12) 1px,
-        transparent 1px,
-        transparent 2px
-      );
-      opacity:0.55;
-      pointer-events:none;
-    }
-
-    .artifact-top{
-      position:relative;
-      display:flex;
-      gap:10px;
-      align-items:flex-start;
-      justify-content:space-between;
-      border-bottom:1px solid var(--crt-green);
-      padding-bottom:10px;
-      margin-bottom:12px;
-    }
-
-    .artifact-title{
-      font-size:14px;
-      text-transform:uppercase;
-      letter-spacing:2px;
-      font-weight:700;
-      opacity:0.98;
-    }
-
-    .artifact-sub{
-      margin-top:6px;
-      font-size:10px;
-      letter-spacing:2px;
-      color:var(--crt-dim);
-      opacity:0.95;
-    }
-
-    .artifact-close{
-      position:relative;
-      border:1px solid var(--crt-green);
-      background:transparent;
-      color:var(--crt-green);
-      padding:8px 10px;
-      font-size:9px;
-      letter-spacing:2px;
-      text-transform:uppercase;
-      cursor:pointer;
-      white-space:nowrap;
-    }
-    .artifact-close:hover{background:var(--crt-green);color:var(--crt-bg);}
-
-    .artifact-grid{
-      position:relative;
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:12px;
-    }
-
-    .artifact-kv{
-      border:1px solid var(--crt-dim);
-      background:rgba(0,0,0,0.22);
-      padding:12px;
-      min-height:0;
-    }
-
-    .artifact-kv .k{
-      font-size:9px;
-      letter-spacing:2px;
-      text-transform:uppercase;
-      color:var(--crt-dim);
-      margin-bottom:6px;
-      opacity:0.95;
-    }
-    .artifact-kv .v{
-      font-size:12px;
-      opacity:0.88;
-      overflow-wrap:anywhere;
-      word-break:break-word;
-    }
-
-    .artifact-notes{
-      grid-column: 1 / span 2;
-    }
-
-    .artifact-mini{
-      margin-top:12px;
-      border-top:1px solid var(--crt-dim);
-      padding-top:12px;
-      position:relative;
-    }
-
-    .artifact-mini .mini-row{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-    }
-
-    .mini-btn{
-      border:2px solid var(--crt-green);
-      background:transparent;
-      color:var(--crt-green);
-      padding:10px 12px;
-      font-family:var(--mono);
-      font-size:10px;
-      letter-spacing:2px;
-      text-transform:uppercase;
-      cursor:pointer;
-      min-width:140px;
-      text-align:center;
-    }
-    .mini-btn:hover{background:var(--crt-green);color:var(--crt-bg);}
-
-    .mini-time{font-size:10px;letter-spacing:2px;color:var(--crt-dim);opacity:0.95;}
-
-    .artifact-link{
-      color:var(--crt-green);
-      text-decoration:underline;
-      cursor:pointer;
-      font-weight:700;
-    }
-    .artifact-link:hover{color:#fff;text-shadow:0 0 10px var(--crt-glow);}
-
-    @media (max-width: 640px){
-      .artifact-grid{grid-template-columns:1fr;}
-      .artifact-notes{grid-column:auto;}
-      .mini-btn{min-width:120px;}
-    }
   </style>
 </head>
 
 <body>
 
+  <!-- Session gate (centered, no explainer copy, no session id shown, no anonymous option) -->
   <div id="session-overlay" aria-hidden="true">
     <div class="session-window">
       <div class="session-title">WLSN SIGNAL ARCHIVE TERMINAL</div>
 
       <div class="session-row">
-        <label for="alias-input"></label>
+        <label for="alias-input">IDENTIFY YOURSELF</label>
         <input id="alias-input" class="session-input" maxlength="18" autocomplete="off" spellcheck="false" placeholder="YOUR NAME">
       </div>
 
       <div class="session-actions">
         <button id="enter-btn" class="btn" type="button">ENTER</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Artifact modal (does not interrupt main player) -->
-  <div id="artifact-modal" aria-hidden="true">
-    <div class="artifact-window" role="dialog" aria-modal="true" aria-label="Artifact Details">
-      <div class="artifact-top">
-        <div>
-          <div class="artifact-title" id="am-title">ARTIFACT</div>
-          <div class="artifact-sub" id="am-sub">META</div>
-        </div>
-        <button class="artifact-close" id="am-close" type="button">CLOSE</button>
-      </div>
-
-      <div class="artifact-grid" id="am-grid"></div>
-
-      <div class="artifact-mini">
-        <div class="mini-row">
-          <button class="mini-btn" id="am-play" type="button">PLAY CLIP</button>
-          <button class="mini-btn" id="am-stop" type="button">STOP</button>
-          <div class="mini-time" id="am-time">00:00-00:00</div>
-        </div>
       </div>
     </div>
   </div>
@@ -831,147 +646,161 @@
 
   <script>
     const D = {
-      people: {
-        djmoondust: { label: "DJ MOONDUST" },
-        tape_hound: { label: "TAPE HOUND" },
-        freq_drift: { label: "FREQ DRIFT" },
-        vinyl_archive: { label: "VINYL ARCHIVE" },
-        signal_lost: { label: "SIGNAL LOST" },
-        reel_to_reel: { label: "REEL TO REEL" }
-      },
-
       transmissions: [
         {
           id:"001",
-          title:"SIGNAL TEST",
+          title:"Initial Signal Test",
           date:"1967-08-12",
           dateFormatted:"12 AUG 1967",
-          audioUrl:"audio/transmission_001.mp3",
-          description:"First recorded transmission. Test pattern followed by audio fragments.",
-          notes:"Aired 12 AUG 1967. Recovered from magnetic tape December 18 2024, reel 001-A. Signal strength varied.",
+          audioUrl:"audio/WLSN - Color Radio from Space - TRANSMISSION 001 - -Initial Signal Test - RECORDED- 12 AUG 1967_2_01.mp3",
+          description:"First recorded transmission. Test pattern followed by musical fragments.",
+          notes:"Recovered from magnetic tape, reel 001-A. Signal degradation minimal.",
           elements:["e001","e002","e036","e003","e004"]
         },
         {
           id:"002",
-          title:"IT'S YOU",
+          title:"IT\'S YOU",
           date:"1967-09-03",
           dateFormatted:"03 SEP 1967",
           audioUrl:"audio/transmission_002.mp3",
           description:"Regular programming. Mix of commercial recordings and field recordings.",
-          notes:"Source uncertain. Possible aircheck from listening post.",
-          elements:["e005","e037","e006","e007"]
+          notes:"Source uncertain. Aircheck / listening-post capture. Artifact list pending timecodes.",
+          elements:["e2001","e2002","e2003","e2004","e2005","e2006","e2007","e2008","e2009","e2010","e2011","e2012","e2013","e2014","e2015","e2016","e2017","e2018","e2019","e2020","e2021","e2022","e2023","e2024","e2025","e2026","e2027","e2028","e2029","e2030","e2031","e2032","e2033","e2034","e2035","e2036","e2037","e2038","e2039","e2040","e2041","e2042","e2043","e2044","e2045","e2046","e2047","e2048","e2049","e2050","e2051","e2052","e2053","e2054","e2055","e2056","e2057","e2058","e2059","e2060","e2061","e2062","e2063","e2064","e2065","e2066","e2067"],
         },
         {
           id:"003",
-          title:"CIRCLES",
+          title:"Late Night Transmission",
           date:"1968-03-15",
           dateFormatted:"15 MAR 1968",
-          audioUrl:"audio/transmission_003.mp3",
+          audioUrl:"",
           description:"Cut broadcast. Multiple sources spliced together.",
-          notes:"Tape quality good with wavering flutter and wow. Signal bleed appears intermittently.",
+          notes:"Tape quality excellent. Signal bleed appears intermittently.",
           elements:["e035","e008","e009","e010","e011","e012","e038","e013","e014","e015","e016","e017","e018","e019","e020","e021","e022","e023","e024","e025","e026","e027","e039","e028","e029","e030","e031","e032","e033","e034"]
         }
       ],
-
       elements: [
-        {id:"e001",transmission_id:"001",start_time:"00:00",end_time:"00:03",type:"unknown",title:"Adjacent channel interference",primary_credit:"Unknown",source:"WLSN Internal Recording",year:"1967",logged_by:"tape_hound",notes:"Male voice. Broadcast training evident.",confidence:"high"},
-        {id:"e002",transmission_id:"001",start_time:"00:45",end_time:"04:12",type:"song",title:"Blue in Green",primary_credit:"Miles Davis",source:"Kind of Blue (Columbia, 1959)",year:"1959",logged_by:"vinyl_archive",notes:"Partial capture. Fades early.",confidence:"high"},
-        {id:"e003",transmission_id:"001",start_time:"04:12",end_time:"04:30",type:"unknown",title:"Unidentified Voice Fragment",primary_credit:"Unknown",source:"Unknown",year:null,logged_by:"signal_lost",notes:"Female voice. Possible adjacent-channel crosstalk.",confidence:"low"},
-        {id:"e004",transmission_id:"001",start_time:"04:30",end_time:"05:00",type:"technical",title:"1kHz Reference Tone",primary_credit:"WLSN Technical",source:"Calibration Reference",year:"1967",logged_by:"reel_to_reel",notes:"Frequency reference signal.",confidence:"high"},
-        {id:"e036",transmission_id:"001",start_time:"02:18",end_time:"02:22",type:"unknown",title:"Carrier Wave Interference",primary_credit:"Unknown",source:"Unknown",year:null,logged_by:"freq_drift",notes:"Brief heterodyne whistle. Frequency bleed.",confidence:"low"},
+        {id:"e001",transmission_id:"001",start_time:"00:00",end_time:"00:45",type:"jingle",title:"WLSN Station Identification",primary_credit:"Unknown Announcer",source:"WLSN Internal Recording",year:"1967",notes:"Male voice. Broadcast training evident.",confidence:"high"},
+        {id:"e002",transmission_id:"001",start_time:"00:45",end_time:"04:12",type:"song",title:"Blue in Green",primary_credit:"Miles Davis",source:"Kind of Blue (Columbia, 1959)",year:"1959",notes:"Partial capture. Fades early.",confidence:"high"},
+        {id:"e003",transmission_id:"001",start_time:"04:12",end_time:"04:30",type:"unknown",title:"Unidentified Voice Fragment",primary_credit:"Unknown",source:"Unknown",year:null,notes:"Female voice. Possible adjacent-channel crosstalk.",confidence:"low"},
+        {id:"e004",transmission_id:"001",start_time:"04:30",end_time:"05:00",type:"technical",title:"1kHz Reference Tone",primary_credit:"WLSN Technical",source:"Calibration Reference",year:"1967",notes:"Frequency reference signal.",confidence:"high"},
+        {id:"e036",transmission_id:"001",start_time:"02:18",end_time:"02:22",type:"unknown",title:"Carrier Wave Interference",primary_credit:"Unknown",source:"Unknown",year:null,notes:"Brief heterodyne whistle. Frequency bleed.",confidence:"low"},
 
-        {id:"e005",transmission_id:"002",start_time:"00:00",end_time:"00:15",type:"technical",title:"Time Signal",primary_credit:"WLSN Technical",source:"Synchronization",year:"1967",logged_by:"reel_to_reel",notes:"Six pip sequence.",confidence:"high"},
-        {id:"e006",transmission_id:"002",start_time:"00:15",end_time:"07:45",type:"song",title:"A Love Supreme, Pt 1",primary_credit:"John Coltrane",source:"A Love Supreme (Impulse!, 1965)",year:"1965",logged_by:"vinyl_archive",notes:"Complete Part 1. Excellent fidelity.",confidence:"high"},
-        {id:"e007",transmission_id:"002",start_time:"07:45",end_time:"08:10",type:"commercial",title:"Soft Drink Advertisement",primary_credit:"Unknown",source:"Radio Campaign",year:"1967",logged_by:"djmoondust",notes:"Regional variant possible.",confidence:"medium"},
-        {id:"e037",transmission_id:"002",start_time:"04:22",end_time:"04:31",type:"unknown",title:"Spanish Language Fragment",primary_credit:"Unknown",source:"Unknown",year:null,logged_by:"signal_lost",notes:"Likely border-station bleed.",confidence:"low"},
-
-        {id:"e008",transmission_id:"003",start_time:"00:00",end_time:"00:15",type:"jingle",title:"Weather Tag",primary_credit:"Los Angeles Station",source:"Broadcast Capture",year:"1968",logged_by:"tape_hound",notes:"Station tag fragment.",confidence:"high"},
-        {id:"e009",transmission_id:"003",start_time:"00:15",end_time:"00:45",type:"commercial",title:"Cereal Spot",primary_credit:"Unknown",source:"Broadcast Capture",year:"1968",logged_by:"djmoondust",notes:"Cut version possible.",confidence:"high"},
-        {id:"e010",transmission_id:"003",start_time:"00:45",end_time:"03:30",type:"song",title:"Look Through My Window",primary_credit:"The Mamas & The Papas",source:"Deliver (Dunhill, 1967)",year:"1967",logged_by:"vinyl_archive",notes:"Album track.",confidence:"high"},
-        {id:"e011",transmission_id:"003",start_time:"03:30",end_time:"06:15",type:"song",title:"The Dance at the Gym",primary_credit:"West Side Story Cast",source:"Soundtrack (Columbia, 1961)",year:"1961",logged_by:"vinyl_archive",notes:"Mambo/Blues segment.",confidence:"high"},
-        {id:"e012",transmission_id:"003",start_time:"06:15",end_time:"08:30",type:"song",title:"Pray for Surf",primary_credit:"The Honeys",source:"Capitol (1963)",year:"1963",logged_by:"vinyl_archive",notes:"Studio production.",confidence:"high"},
-        {id:"e013",transmission_id:"003",start_time:"08:30",end_time:"10:45",type:"song",title:"Easy as 1-2-3",primary_credit:"Jan & Dean",source:"Liberty (1966)",year:"1966",logged_by:"vinyl_archive",notes:"Rare album track.",confidence:"medium"},
-        {id:"e014",transmission_id:"003",start_time:"10:45",end_time:"12:50",type:"song",title:"Run Run Run",primary_credit:"The Gestures",source:"Soma (1964)",year:"1964",logged_by:"vinyl_archive",notes:"Regional hit.",confidence:"high"},
-        {id:"e015",transmission_id:"003",start_time:"12:50",end_time:"15:20",type:"song",title:"Underdog",primary_credit:"Sly & The Family Stone",source:"Epic (1967)",year:"1967",logged_by:"vinyl_archive",notes:"Deep cut.",confidence:"high"},
-        {id:"e016",transmission_id:"003",start_time:"15:20",end_time:"18:00",type:"song",title:"Sarah Saturday",primary_credit:"Lazy Smoke",source:"Onyx (1968)",year:"1968",logged_by:"vinyl_archive",notes:"Rare pressing.",confidence:"medium"},
-        {id:"e017",transmission_id:"003",start_time:"18:00",end_time:"20:30",type:"song",title:"Tomorrow",primary_credit:"Strawberry Alarm Clock",source:"Uni (1967)",year:"1967",logged_by:"vinyl_archive",notes:"Album track.",confidence:"high"},
-        {id:"e018",transmission_id:"003",start_time:"20:30",end_time:"22:45",type:"song",title:"Mama Says",primary_credit:"The Beach Boys",source:"Friends (1968)",year:"1968",logged_by:"vinyl_archive",notes:"Album fragment.",confidence:"high"},
-        {id:"e019",transmission_id:"003",start_time:"22:45",end_time:"25:00",type:"song",title:"Going Out of My Head",primary_credit:"The Zombies",source:"1968",year:"1968",logged_by:"vinyl_archive",notes:"Alternate cut possible.",confidence:"high"},
-        {id:"e020",transmission_id:"003",start_time:"25:00",end_time:"27:15",type:"song",title:"Please No More Sad Songs",primary_credit:"The Idle Race",source:"1968",year:"1968",logged_by:"vinyl_archive",notes:"Pre-ELO credit.",confidence:"high"},
-        {id:"e021",transmission_id:"003",start_time:"27:15",end_time:"30:00",type:"song",title:"Compared to What",primary_credit:"Les McCann",source:"1969",year:"1969",logged_by:"vinyl_archive",notes:"Live capture.",confidence:"high"},
-        {id:"e022",transmission_id:"003",start_time:"30:00",end_time:"31:00",type:"song",title:"Lost in Space Theme",primary_credit:"TV Theme",source:"CBS (1965)",year:"1965",logged_by:"djmoondust",notes:"Opening title.",confidence:"high"},
-        {id:"e023",transmission_id:"003",start_time:"31:00",end_time:"33:30",type:"song",title:"In My Lonely Room",primary_credit:"Martha Reeves & The Vandellas",source:"1965",year:"1965",logged_by:"vinyl_archive",notes:"Motown cut.",confidence:"high"},
-        {id:"e024",transmission_id:"003",start_time:"33:30",end_time:"34:30",type:"spoken",title:"TV Clip",primary_credit:"Unknown",source:"Broadcast Fragment",year:"1964",logged_by:"signal_lost",notes:"Dialog excerpt.",confidence:"medium"},
-        {id:"e025",transmission_id:"003",start_time:"34:30",end_time:"35:00",type:"sound",title:"Audience Cheering",primary_credit:"Unknown",source:"Concert Film",year:"1964",logged_by:"signal_lost",notes:"Crowd wash.",confidence:"high"},
-        {id:"e026",transmission_id:"003",start_time:"35:00",end_time:"37:30",type:"song",title:"Live Performance Excerpt",primary_credit:"Unknown",source:"Concert Film",year:"1964",logged_by:"signal_lost",notes:"Short excerpt.",confidence:"high"},
-        {id:"e027",transmission_id:"003",start_time:"37:30",end_time:"39:00",type:"song",title:"Unverified Demo",primary_credit:"Unknown",source:"Bootleg Circulation",year:"1967",logged_by:"freq_drift",notes:"Unconfirmed source.",confidence:"low"},
-        {id:"e028",transmission_id:"003",start_time:"39:00",end_time:"41:15",type:"song",title:"2002 A Hit Song",primary_credit:"The Free Design",source:"1969",year:"1969",logged_by:"vinyl_archive",notes:"Baroque pop arrangement.",confidence:"high"},
-        {id:"e029",transmission_id:"003",start_time:"41:15",end_time:"43:30",type:"song",title:"Double Yellow Line",primary_credit:"The Music Machine",source:"1967",year:"1967",logged_by:"vinyl_archive",notes:"Single cut.",confidence:"high"},
-        {id:"e030",transmission_id:"003",start_time:"43:30",end_time:"45:45",type:"song",title:"She Loves You",primary_credit:"The Beatles",source:"1963",year:"1963",logged_by:"vinyl_archive",notes:"Single.",confidence:"high"},
-        {id:"e031",transmission_id:"003",start_time:"45:45",end_time:"48:30",type:"song",title:"God Only Knows",primary_credit:"The Beach Boys",source:"1966",year:"1966",logged_by:"vinyl_archive",notes:"Album track.",confidence:"high"},
-        {id:"e032",transmission_id:"003",start_time:"48:30",end_time:"49:30",type:"spoken",title:"Film Narration",primary_credit:"Unknown",source:"Film Fragment",year:"1953",logged_by:"signal_lost",notes:"Narration excerpt.",confidence:"medium"},
-        {id:"e033",transmission_id:"003",start_time:"49:30",end_time:"50:30",type:"spoken",title:"Film Dialog",primary_credit:"Unknown",source:"Film Fragment",year:"1964",logged_by:"signal_lost",notes:"Dialog excerpt.",confidence:"medium"},
-        {id:"e034",transmission_id:"003",start_time:"50:30",end_time:"54:00",type:"song",title:"Solo Piano Performance",primary_credit:"Unknown",source:"TV Special",year:"1967",logged_by:"freq_drift",notes:"Short performance.",confidence:"high"},
-        {id:"e035",transmission_id:"003",start_time:"00:08",end_time:"00:23",type:"jingle",title:"Radio Sting",primary_credit:"Station Singers",source:"Station Kit",year:"1967",logged_by:"tape_hound",notes:"Identification sting.",confidence:"high"},
-        {id:"e038",transmission_id:"003",start_time:"12:08",end_time:"12:15",type:"unknown",title:"Morse Pattern",primary_credit:"Unknown",source:"Unknown",year:null,logged_by:"freq_drift",notes:"Rhythmic beeping. Interference.",confidence:"low"},
-        {id:"e039",transmission_id:"003",start_time:"28:45",end_time:"28:52",type:"unknown",title:"Distorted Music Fragment",primary_credit:"Unknown",source:"Unknown",year:null,logged_by:"freq_drift",notes:"Heavily degraded. Unconfirmed.",confidence:"low"}
+                {id:"e2001",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"sfx",title:"RAYS",primary_credit:"Unknown",source:"Unknown",year:null,logged_by:"tape_hound",notes:"",confidence:"low"},
+        {id:"e2002",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"IT CAME FROM OUTER SPACE (score cue)",primary_credit:"Irving Gertz / Herman Stein",source:"It Came from Outer Space (Universal, 1953)",year:"1953",logged_by:"vinyl_archive",notes:"Film score cue; exact cue name depends on source rip.",confidence:"medium"},
+        {id:"e2003",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",source:"Receiver scan / broadcast tuning SFX",year:null,logged_by:"reel_to_reel",notes:"",confidence:"medium"},
+        {id:"e2004",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"jingle",title:"WHBQ (station ID)",primary_credit:"WHBQ (Memphis)",source:"Station identification jingle",year:null,logged_by:"djmoondust",notes:"",confidence:"medium"},
+        {id:"e2005",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"WOLFMAN JACK (American Graffiti)",primary_credit:"Wolfman Jack",source:"American Graffiti (1973) radio sequence",year:"1973",logged_by:"signal_lost",notes:"",confidence:"medium"},
+        {id:"e2006",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"ROBINSON CRUSOE ON MARS (excerpt)",primary_credit:"Robinson Crusoe on Mars (Filmways)",source:"Film excerpt; Adam West appears in cast",year:"1964",logged_by:"signal_lost",notes:"",confidence:"medium"},
+        {id:"e2007",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"commercial",title:"PILLSBURY COOKIES (Something from the oven)",primary_credit:"Pillsbury",source:"Campaign: Nothin' says lovin' like somethin' from the oven / Pillsbury says it best",year:null,logged_by:"djmoondust",notes:"",confidence:"high"},
+        {id:"e2008",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"commercial",title:"CAMEL CIGARETTES (Have a real cigarette)",primary_credit:"Camel (R.J. Reynolds)",source:"Campaign: Have a real cigarette",year:null,logged_by:"djmoondust",notes:"",confidence:"high"},
+        {id:"e2009",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"jingle",title:"MUSIC TIME (jingle)",primary_credit:"Unknown",source:"Source unknown",year:null,logged_by:"tape_hound",notes:"",confidence:"low"},
+        {id:"e2010",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"IT’S YOU",primary_credit:"The Millennium",source:"Columbia era (exact release TBD)",year:"1968",logged_by:"vinyl_archive",notes:"",confidence:"medium"},
+        {id:"e2011",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"YOU ARE LISTENING TO COLOR RADIO FROM SPACE",primary_credit:"WLSN / Brain Crampsmen",source:"Original narration",year:"2026",logged_by:"reel_to_reel",notes:"",confidence:"high"},
+        {id:"e2012",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"ROD SERLING (pitch/promo excerpt)",primary_credit:"Rod Serling",source:"Twilight Zone related pitch/promo (exact source TBD)",year:null,logged_by:"signal_lost",notes:"Needs exact clip source to date precisely.",confidence:"low"},
+        {id:"e2013",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"sfx",title:"MAGIC SPELL",primary_credit:"Unknown",source:"SFX library",year:null,logged_by:"tape_hound",notes:"",confidence:"low"},
+        {id:"e2014",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",source:"Receiver scan / broadcast tuning SFX",year:null,logged_by:"reel_to_reel",notes:"",confidence:"medium"},
+        {id:"e2015",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"RADIO SIGNAL BEEPING",primary_credit:"Unknown",source:"Technical signal beeps (unverified)",year:null,logged_by:"reel_to_reel",notes:"",confidence:"low"},
+        {id:"e2016",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"commercial",title:"COKE WEIGHT LOSS (diet product ad)",primary_credit:"Unknown",source:"Commercial clip (exact product TBD)",year:null,logged_by:"djmoondust",notes:"Needs product name to verify year.",confidence:"low"},
+        {id:"e2017",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"2002 – A HIT SONG",primary_credit:"The Free Design",source:"Project 3 era",year:"1969",logged_by:"vinyl_archive",notes:"",confidence:"high"},
+        {id:"e2018",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",source:"Receiver scan / broadcast tuning SFX",year:null,logged_by:"reel_to_reel",notes:"",confidence:"medium"},
+        {id:"e2019",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"commercial",title:"SUGAR CRISP (Granny Goodwitch)",primary_credit:"Post",source:"Agency: Benton & Bowles (DMB&B)",year:null,logged_by:"djmoondust",notes:"",confidence:"high"},
+        {id:"e2020",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"jingle",title:"93 KHJ MORE MUSIC (station ID)",primary_credit:"93 KHJ (Los Angeles)",source:"Station jingle/ID",year:null,logged_by:"djmoondust",notes:"",confidence:"medium"},
+        {id:"e2021",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"IT’S MY PARTY (T.A.M.I. Show)",primary_credit:"Lesley Gore",source:"The T.A.M.I. Show performance clip",year:"1964",logged_by:"vinyl_archive",notes:"",confidence:"medium"},
+        {id:"e2022",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"jingle",title:"MUSICRADIO WLS (ID)",primary_credit:"WLS (Chicago)",source:"Station ID package (PAMS / singers; exact cut TBD)",year:null,logged_by:"djmoondust",notes:"Exact package/cut TBD.",confidence:"low"},
+        {id:"e2023",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"DOUBLE YELLOW LINE",primary_credit:"The Music Machine",source:"Single/album era (exact release TBD)",year:"1967",logged_by:"vinyl_archive",notes:"Confirm exact release metadata later.",confidence:"medium"},
+        {id:"e2024",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"TOMORROW",primary_credit:"Strawberry Alarm Clock",source:"Uni era",year:"1967",logged_by:"vinyl_archive",notes:"",confidence:"high"},
+        {id:"e2025",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",source:"Receiver scan / broadcast tuning SFX",year:null,logged_by:"reel_to_reel",notes:"",confidence:"medium"},
+        {id:"e2026",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"BATMAN IN COLOR (Hi Diddle Riddle)",primary_credit:"Batman (TV series)",source:"Episode Hi Diddle Riddle",year:"1966",logged_by:"signal_lost",notes:"",confidence:"high"},
+        {id:"e2027",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"SCOOBY-DOO (theme)",primary_credit:"Hoyt Curtin",source:"Scooby-Doo, Where Are You!",year:"1969",logged_by:"vinyl_archive",notes:"",confidence:"high"},
+        {id:"e2028",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"THE PROPER ORNAMENTS",primary_credit:"Carpenters Union",source:"Recording (exact release TBD)",year:null,logged_by:"vinyl_archive",notes:"",confidence:"low"},
+        {id:"e2029",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"NIGHTMARE (narration)",primary_credit:"Unknown",source:"Source TBD",year:null,logged_by:"signal_lost",notes:"",confidence:"low"},
+        {id:"e2030",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"sfx",title:"SAMANTHA’S NOSE TWITCH",primary_credit:"Bewitched (TV)",source:"Series SFX",year:"1964",logged_by:"tape_hound",notes:"",confidence:"medium"},
+        {id:"e2031",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"sfx",title:"AUDIENCE LAUGHTER",primary_credit:"Bewitched (TV)",source:"Laugh track / audience bed (source TBD)",year:"1964",logged_by:"tape_hound",notes:"",confidence:"low"},
+        {id:"e2032",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"jingle",title:"MUSICRADIO WLS (multiple idents)",primary_credit:"WLS (Chicago)",source:"Multiple ident recordings (package TBD)",year:null,logged_by:"djmoondust",notes:"",confidence:"low"},
+        {id:"e2033",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"sfx",title:"RAYS",primary_credit:"Unknown",source:"Unknown",year:null,logged_by:"tape_hound",notes:"",confidence:"low"},
+        {id:"e2034",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"DOUBLE YELLOW LINE (repeat)",primary_credit:"The Music Machine",source:"Repeat",year:"1967",logged_by:"vinyl_archive",notes:"",confidence:"medium"},
+        {id:"e2035",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",source:"Receiver scan / broadcast tuning SFX",year:null,logged_by:"reel_to_reel",notes:"",confidence:"medium"},
+        {id:"e2036",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"SHE LOVES YOU",primary_credit:"The Beatles",source:"Single",year:"1963",logged_by:"vinyl_archive",notes:"",confidence:"high"},
+        {id:"e2037",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"jingle",title:"93 KHJ (station ID)",primary_credit:"93 KHJ (Los Angeles)",source:"Station jingle/ID",year:null,logged_by:"djmoondust",notes:"",confidence:"medium"},
+        {id:"e2038",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",source:"Receiver scan / broadcast tuning SFX",year:null,logged_by:"reel_to_reel",notes:"",confidence:"medium"},
+        {id:"e2039",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"GOD ONLY KNOWS",primary_credit:"The Beach Boys",source:"Pet Sounds",year:"1966",logged_by:"vinyl_archive",notes:"Brian Wilson / Tony Asher",confidence:"high"},
+        {id:"e2040",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"IT CAME FROM OUTER SPACE (score cue, repeat)",primary_credit:"Irving Gertz / Herman Stein",source:"It Came from Outer Space (Universal, 1953)",year:"1953",logged_by:"vinyl_archive",notes:"",confidence:"medium"},
+        {id:"e2041",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"ROBINSON CRUSOE ON MARS (excerpt, repeat)",primary_credit:"Robinson Crusoe on Mars (Filmways)",source:"Film excerpt; Adam West appears in cast",year:"1964",logged_by:"signal_lost",notes:"",confidence:"medium"},
+        {id:"e2042",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",source:"Receiver scan / broadcast tuning SFX",year:null,logged_by:"reel_to_reel",notes:"",confidence:"medium"},
+        {id:"e2043",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"BEACH BOYS TV SPECIAL (Surf’s Up excerpt)",primary_credit:"The Beach Boys",source:"TV special excerpt (exact special TBD)",year:null,logged_by:"signal_lost",notes:"Verify exact special/title later.",confidence:"low"},
+        {id:"e2044",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"sfx",title:"MAGIC SPELL",primary_credit:"Unknown",source:"SFX library",year:null,logged_by:"tape_hound",notes:"",confidence:"low"},
+        {id:"e2045",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"UNDERDOG",primary_credit:"Sly & The Family Stone",source:"Epic era",year:"1967",logged_by:"vinyl_archive",notes:"",confidence:"high"},
+        {id:"e2046",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"sfx",title:"RAYS",primary_credit:"Unknown",source:"Unknown",year:null,logged_by:"tape_hound",notes:"",confidence:"low"},
+        {id:"e2047",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"SCOOBY-DOO UNDERSCORE",primary_credit:"Hoyt Curtin (likely)",source:"Scooby-Doo underscore (verify)",year:null,logged_by:"vinyl_archive",notes:"Confirm source of underscore.",confidence:"low"},
+        {id:"e2048",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"jingle",title:"MUSICRADIO WLS (ID, repeat)",primary_credit:"WLS (Chicago)",source:"Station ID package (TBD)",year:null,logged_by:"djmoondust",notes:"",confidence:"low"},
+        {id:"e2049",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",source:"Receiver scan / broadcast tuning SFX",year:null,logged_by:"reel_to_reel",notes:"",confidence:"medium"},
+        {id:"e2050",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"ROBINSON CRUSOE ON MARS (excerpt, repeat)",primary_credit:"Robinson Crusoe on Mars (Filmways)",source:"Film excerpt; Adam West appears in cast",year:"1964",logged_by:"signal_lost",notes:"",confidence:"medium"},
+        {id:"e2051",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"sfx",title:"MAGIC SPELL",primary_credit:"Unknown",source:"SFX library",year:null,logged_by:"tape_hound",notes:"",confidence:"low"},
+        {id:"e2052",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"IT SEEMS TO ME",primary_credit:"The Gestures",source:"Soma era",year:"1964",logged_by:"vinyl_archive",notes:"",confidence:"high"},
+        {id:"e2053",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",source:"Receiver scan / broadcast tuning SFX",year:null,logged_by:"reel_to_reel",notes:"",confidence:"medium"},
+        {id:"e2054",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"commercial",title:"KOOL-AID KIDS (Australia)",primary_credit:"Kool-Aid (General Foods)",source:"Commercial clip (verify year)",year:"1960",logged_by:"djmoondust",notes:"Verify exact spot and year.",confidence:"low"},
+        {id:"e2055",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"RUN RUN RUN",primary_credit:"The Gestures",source:"Soma",year:"1964",logged_by:"vinyl_archive",notes:"",confidence:"high"},
+        {id:"e2056",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",source:"Receiver scan / broadcast tuning SFX",year:null,logged_by:"reel_to_reel",notes:"",confidence:"medium"},
+        {id:"e2057",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"ROBINSON CRUSOE ON MARS (excerpt, repeat)",primary_credit:"Robinson Crusoe on Mars (Filmways)",source:"Film excerpt; Adam West appears in cast",year:"1964",logged_by:"signal_lost",notes:"",confidence:"medium"},
+        {id:"e2058",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"WEATHER REPORT (93 KHJ)",primary_credit:"93 KHJ (Los Angeles)",source:"Aircheck fragment",year:null,logged_by:"signal_lost",notes:"",confidence:"low"},
+        {id:"e2059",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"IN MY LONELY ROOM",primary_credit:"Martha Reeves & The Vandellas",source:"Motown",year:"1964",logged_by:"vinyl_archive",notes:"",confidence:"high"},
+        {id:"e2060",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"BATMAN IN COLOR (music tag)",primary_credit:"Batman (TV series)",source:"Theme/tag (verify exact)",year:null,logged_by:"vinyl_archive",notes:"",confidence:"low"},
+        {id:"e2061",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"sfx",title:"SCREAM (Nightmare short film)",primary_credit:"Unknown",source:"Unknown",year:null,logged_by:"tape_hound",notes:"",confidence:"low"},
+        {id:"e2062",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"TOMORROW (repeat)",primary_credit:"Strawberry Alarm Clock",source:"Repeat",year:"1967",logged_by:"vinyl_archive",notes:"",confidence:"high"},
+        {id:"e2063",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"COLOR RADIO FROM SPACE (credits)",primary_credit:"WLSN / Brain Crampsmen",source:"Original credits VO",year:"2026",logged_by:"reel_to_reel",notes:"",confidence:"high"},
+        {id:"e2064",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"SHORTWAVE HAMRADIO RECEIVER",primary_credit:"Unknown",source:"Shortwave receiver audio",year:null,logged_by:"reel_to_reel",notes:"",confidence:"medium"},
+        {id:"e2065",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"THIS HAS BEEN A FILMWAYS PRESENTATION",primary_credit:"Filmways (tag)",source:"End tag (voice credited by you as Zsa Zsa Gabor)",year:null,logged_by:"signal_lost",notes:"Verify exact end tag version later.",confidence:"medium"},
+        {id:"e2066",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"jingle",title:"MUSICRADIO WLS (ONE tag)",primary_credit:"WLS (Chicago)",source:"PAMS style package (TBD)",year:null,logged_by:"djmoondust",notes:"",confidence:"low"},
+        {id:"e2067",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"SHORTWAVE HAMRADIO RECEIVER (repeat)",primary_credit:"Unknown",source:"Shortwave receiver audio",year:null,logged_by:"reel_to_reel",notes:"",confidence:"medium"},
+{id:"e008",transmission_id:"003",start_time:"00:00",end_time:"00:15",type:"jingle",title:"Weather Tag",primary_credit:"Los Angeles Station",source:"Broadcast Capture",year:"1968",notes:"Station tag fragment.",confidence:"high"},
+        {id:"e009",transmission_id:"003",start_time:"00:15",end_time:"00:45",type:"commercial",title:"Cereal Spot",primary_credit:"Unknown",source:"Broadcast Capture",year:"1968",notes:"Cut version possible.",confidence:"high"},
+        {id:"e010",transmission_id:"003",start_time:"00:45",end_time:"03:30",type:"song",title:"Look Through My Window",primary_credit:"The Mamas & The Papas",source:"Deliver (Dunhill, 1967)",year:"1967",notes:"Album track.",confidence:"high"},
+        {id:"e011",transmission_id:"003",start_time:"03:30",end_time:"06:15",type:"song",title:"The Dance at the Gym",primary_credit:"West Side Story Cast",source:"Soundtrack (Columbia, 1961)",year:"1961",notes:"Mambo/Blues segment.",confidence:"high"},
+        {id:"e012",transmission_id:"003",start_time:"06:15",end_time:"08:30",type:"song",title:"Pray for Surf",primary_credit:"The Honeys",source:"Capitol (1963)",year:"1963",notes:"Studio production.",confidence:"high"},
+        {id:"e013",transmission_id:"003",start_time:"08:30",end_time:"10:45",type:"song",title:"Easy as 1-2-3",primary_credit:"Jan & Dean",source:"Liberty (1966)",year:"1966",notes:"Rare album track.",confidence:"medium"},
+        {id:"e014",transmission_id:"003",start_time:"10:45",end_time:"12:50",type:"song",title:"Run Run Run",primary_credit:"The Gestures",source:"Soma (1964)",year:"1964",notes:"Regional hit.",confidence:"high"},
+        {id:"e015",transmission_id:"003",start_time:"12:50",end_time:"15:20",type:"song",title:"Underdog",primary_credit:"Sly & The Family Stone",source:"Epic (1967)",year:"1967",notes:"Deep cut.",confidence:"high"},
+        {id:"e016",transmission_id:"003",start_time:"15:20",end_time:"18:00",type:"song",title:"Sarah Saturday",primary_credit:"Lazy Smoke",source:"Onyx (1968)",year:"1968",notes:"Rare pressing.",confidence:"medium"},
+        {id:"e017",transmission_id:"003",start_time:"18:00",end_time:"20:30",type:"song",title:"Tomorrow",primary_credit:"Strawberry Alarm Clock",source:"Uni (1967)",year:"1967",notes:"Album track.",confidence:"high"},
+        {id:"e018",transmission_id:"003",start_time:"20:30",end_time:"22:45",type:"song",title:"Mama Says",primary_credit:"The Beach Boys",source:"Friends (1968)",year:"1968",notes:"Album fragment.",confidence:"high"},
+        {id:"e019",transmission_id:"003",start_time:"22:45",end_time:"25:00",type:"song",title:"Going Out of My Head",primary_credit:"The Zombies",source:"1968",year:"1968",notes:"Alternate cut possible.",confidence:"high"},
+        {id:"e020",transmission_id:"003",start_time:"25:00",end_time:"27:15",type:"song",title:"Please No More Sad Songs",primary_credit:"The Idle Race",source:"1968",year:"1968",notes:"Pre-ELO credit.",confidence:"high"},
+        {id:"e021",transmission_id:"003",start_time:"27:15",end_time:"30:00",type:"song",title:"Compared to What",primary_credit:"Les McCann",source:"1969",year:"1969",notes:"Live capture.",confidence:"high"},
+        {id:"e022",transmission_id:"003",start_time:"30:00",end_time:"31:00",type:"song",title:"Lost in Space Theme",primary_credit:"TV Theme",source:"CBS (1965)",year:"1965",notes:"Opening title.",confidence:"high"},
+        {id:"e023",transmission_id:"003",start_time:"31:00",end_time:"33:30",type:"song",title:"In My Lonely Room",primary_credit:"Martha Reeves & The Vandellas",source:"1965",year:"1965",notes:"Motown cut.",confidence:"high"},
+        {id:"e024",transmission_id:"003",start_time:"33:30",end_time:"34:30",type:"spoken",title:"TV Clip",primary_credit:"Unknown",source:"Broadcast Fragment",year:"1964",notes:"Dialog excerpt.",confidence:"medium"},
+        {id:"e025",transmission_id:"003",start_time:"34:30",end_time:"35:00",type:"sound",title:"Audience Cheering",primary_credit:"Unknown",source:"Concert Film",year:"1964",notes:"Crowd wash.",confidence:"high"},
+        {id:"e026",transmission_id:"003",start_time:"35:00",end_time:"37:30",type:"song",title:"Live Performance Excerpt",primary_credit:"Unknown",source:"Concert Film",year:"1964",notes:"Short excerpt.",confidence:"high"},
+        {id:"e027",transmission_id:"003",start_time:"37:30",end_time:"39:00",type:"song",title:"Unverified Demo",primary_credit:"Unknown",source:"Bootleg Circulation",year:"1967",notes:"Unconfirmed source.",confidence:"low"},
+        {id:"e028",transmission_id:"003",start_time:"39:00",end_time:"41:15",type:"song",title:"2002 A Hit Song",primary_credit:"The Free Design",source:"1969",year:"1969",notes:"Baroque pop arrangement.",confidence:"high"},
+        {id:"e029",transmission_id:"003",start_time:"41:15",end_time:"43:30",type:"song",title:"Double Yellow Line",primary_credit:"The Music Machine",source:"1967",year:"1967",notes:"Single cut.",confidence:"high"},
+        {id:"e030",transmission_id:"003",start_time:"43:30",end_time:"45:45",type:"song",title:"She Loves You",primary_credit:"The Beatles",source:"1963",year:"1963",notes:"Single.",confidence:"high"},
+        {id:"e031",transmission_id:"003",start_time:"45:45",end_time:"48:30",type:"song",title:"God Only Knows",primary_credit:"The Beach Boys",source:"1966",year:"1966",notes:"Album track.",confidence:"high"},
+        {id:"e032",transmission_id:"003",start_time:"48:30",end_time:"49:30",type:"spoken",title:"Film Narration",primary_credit:"Unknown",source:"Film Fragment",year:"1953",notes:"Narration excerpt.",confidence:"medium"},
+        {id:"e033",transmission_id:"003",start_time:"49:30",end_time:"50:30",type:"spoken",title:"Film Dialog",primary_credit:"Unknown",source:"Film Fragment",year:"1964",notes:"Dialog excerpt.",confidence:"medium"},
+        {id:"e034",transmission_id:"003",start_time:"50:30",end_time:"54:00",type:"song",title:"Solo Piano Performance",primary_credit:"Unknown",source:"TV Special",year:"1967",notes:"Short performance.",confidence:"high"},
+        {id:"e035",transmission_id:"003",start_time:"00:08",end_time:"00:23",type:"jingle",title:"Radio Sting",primary_credit:"Station Singers",source:"Station Kit",year:"1967",notes:"Identification sting.",confidence:"high"},
+        {id:"e038",transmission_id:"003",start_time:"12:08",end_time:"12:15",type:"unknown",title:"Morse Pattern",primary_credit:"Unknown",source:"Unknown",year:null,notes:"Rhythmic beeping. Interference.",confidence:"low"},
+        {id:"e039",transmission_id:"003",start_time:"28:45",end_time:"28:52",type:"unknown",title:"Distorted Music Fragment",primary_credit:"Unknown",source:"Unknown",year:null,notes:"Heavily degraded. Unconfirmed.",confidence:"low"}
       ]
     };
-
-    const qs = (sel, root=document) => root.querySelector(sel);
-    const qsa = (sel, root=document) => Array.from(root.querySelectorAll(sel));
-
-    function pad2(n){ return String(n).padStart(2,'0'); }
-
-    function makeSessionId(){
-      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-      let out = '';
-      for(let i=0;i<8;i++){ out += chars[Math.floor(Math.random()*chars.length)]; }
-      return out;
-    }
-
-    function escapeHtml(s){
-      return String(s ?? '')
-        .replace(/&/g,'&amp;')
-        .replace(/</g,'&lt;')
-        .replace(/>/g,'&gt;')
-        .replace(/"/g,'&quot;')
-        .replace(/'/g,'&#39;');
-    }
-
-    function timeToSeconds(t){
-      const m = String(t || '0:0').trim().split(':');
-      const mm = parseInt(m[0] || '0', 10);
-      const ss = parseInt(m[1] || '0', 10);
-      return Math.max(0, (isFinite(mm)?mm:0) * 60 + (isFinite(ss)?ss:0));
-    }
 
     class App {
       constructor(){
         this.data = D;
-        this.appEl = qs('#app');
-
-        this.overlay = qs('#session-overlay');
-        this.aliasInput = qs('#alias-input');
-        this.enterBtn = qs('#enter-btn');
-        this.sessionIndicator = qs('#session-indicator');
-
-        this.navTrans = qs('#nav-transmissions');
-        this.navInfo = qs('#nav-info');
-
-        this.session = {
-          alias: sessionStorage.getItem('wlsn_alias') || '',
-          id: sessionStorage.getItem('wlsn_session_id') || '',
-          start: Number(sessionStorage.getItem('wlsn_session_start') || 0)
-        };
+        this.chatMessages = [];
+        this.chatScrollPos = 0;
+        this._sessionTimer = null;
+        this._slideshowTimer = null;
+        this.chatInterval = null;
 
         this.chatBots = [
-          {key:'djmoondust',location:'Portland, OR'},
-          {key:'tape_hound',location:'London, UK'},
-          {key:'freq_drift',location:'Tokyo, JP'},
-          {key:'vinyl_archive',location:'Melbourne, AU'},
-          {key:'signal_lost',location:'Brooklyn, NY'},
-          {key:'reel_to_reel',location:'Berlin, DE'}
+          {name:'djmoondust',location:'Portland, OR'},
+          {name:'tape_hound',location:'London, UK'},
+          {name:'freq_drift',location:'Tokyo, JP'},
+          {name:'vinyl_archive',location:'Melbourne, AU'},
+          {name:'signal_lost',location:'Brooklyn, NY'},
+          {name:'reel_to_reel',location:'Berlin, DE'}
         ];
 
         this.botMessages = [
@@ -990,754 +819,4 @@
           {bot:1,text:"003: the word 'network' pops once, then disappears. too clean to be accidental."},
           {bot:3,text:"That word sits on top of the hiss, not inside it."},
           {bot:0,text:"Reminder: tag artifacts separately from tracks. this is not a playlist.",reply:true},
-          {bot:4,text:"Ghost note under the tone in 001. could be a second deck running.",reply:true}
-        ];
-
-        this.slides = [
-          {src:"images/wlsn-01.jpg",caption:"WLSN ARCHIVE PHOTO | REEL BOX FRAGMENT"}
-        ];
-
-        this._uptimeTimer = null;
-        this._chatTimer = null;
-        this._audio = null;
-
-        this._modalAudio = null;
-        this._modalStopAt = null;
-        this._modalTick = null;
-        this._modalContext = null; // { tx, element }
-
-        this._chatIdx = 0;
-      }
-
-      init(){
-        this.bindSessionGate();
-        this.bindRouter();
-        this.bindArtifactModal();
-        this.ensureSession();
-        this.renderRoute();
-        this.startUptime();
-      }
-
-      bindSessionGate(){
-        const submit = () => {
-          const alias = (this.aliasInput.value || '').trim().toUpperCase();
-          if(!alias){
-            this.aliasInput.focus();
-            return;
-          }
-          this.session.alias = alias;
-          sessionStorage.setItem('wlsn_alias', this.session.alias);
-
-          if(!this.session.id){
-            this.session.id = makeSessionId();
-            sessionStorage.setItem('wlsn_session_id', this.session.id);
-          }
-
-          if(!this.session.start){
-            this.session.start = Date.now();
-            sessionStorage.setItem('wlsn_session_start', String(this.session.start));
-          }
-
-          this.hideOverlay();
-          this.updateSessionPanel();
-        };
-
-        this.enterBtn.addEventListener('click', submit);
-        this.aliasInput.addEventListener('keydown', (e) => {
-          if(e.key === 'Enter') submit();
-        });
-      }
-
-      ensureSession(){
-        if(this.session.alias && this.session.start){
-          if(!this.session.id){
-            this.session.id = makeSessionId();
-            sessionStorage.setItem('wlsn_session_id', this.session.id);
-          }
-          this.hideOverlay();
-          this.updateSessionPanel();
-          return;
-        }
-        this.showOverlay();
-        this.updateSessionPanel(true);
-        setTimeout(() => this.aliasInput.focus(), 60);
-      }
-
-      showOverlay(){
-        this.overlay.classList.add('active');
-        this.overlay.setAttribute('aria-hidden','false');
-      }
-
-      hideOverlay(){
-        this.overlay.classList.remove('active');
-        this.overlay.setAttribute('aria-hidden','true');
-      }
-
-      startUptime(){
-        if(this._uptimeTimer) clearInterval(this._uptimeTimer);
-        this._uptimeTimer = setInterval(() => this.updateSessionPanel(), 1000);
-      }
-
-      updateSessionPanel(isLocked=false){
-        const alias = this.session.alias || 'UNIDENTIFIED';
-        const id = this.session.id || '--------';
-
-        let uptime = '00:00:00';
-        if(this.session.start){
-          const s = Math.max(0, Math.floor((Date.now() - this.session.start) / 1000));
-          const h = Math.floor(s / 3600);
-          const m = Math.floor((s % 3600) / 60);
-          const sec = s % 60;
-          uptime = `${pad2(h)}:${pad2(m)}:${pad2(sec)}`;
-        }
-
-        this.sessionIndicator.innerHTML = isLocked
-          ? `ACCESS LOCKED | <b>IDENTIFICATION REQUIRED</b>`
-          : `LOGGED AS <b>${alias}</b> | SESSION <b>${id}</b> | UPTIME <b>${uptime}</b>`;
-      }
-
-      bindRouter(){
-        window.addEventListener('hashchange', () => this.renderRoute());
-
-        const go = (hash) => {
-          if(location.hash !== hash) location.hash = hash;
-          else this.renderRoute();
-        };
-
-        this.navTrans.addEventListener('click', (e) => {
-          e.preventDefault();
-          go('#transmissions');
-        });
-        this.navInfo.addEventListener('click', (e) => {
-          e.preventDefault();
-          go('#info');
-        });
-      }
-
-      setActiveNav(route){
-        this.navTrans.classList.remove('active');
-        this.navInfo.classList.remove('active');
-        if(route === 'info') this.navInfo.classList.add('active');
-        else this.navTrans.classList.add('active');
-      }
-
-      stopTimers(){
-        if(this._chatTimer) clearInterval(this._chatTimer);
-        this._chatTimer = null;
-      }
-
-      stopAudio(){
-        if(this._audio){
-          try { this._audio.pause(); } catch(e) {}
-          this._audio = null;
-        }
-      }
-
-      renderRoute(){
-        const hash = (location.hash || '#transmissions').replace(/^#/, '');
-        const parts = hash.split('/').filter(Boolean);
-
-        this.stopTimers();
-        this.stopAudio();
-
-        if(parts[0] === 'info'){
-          this.setActiveNav('info');
-          this.renderInfo();
-          return;
-        }
-
-        this.setActiveNav('transmissions');
-
-        if(parts[0] === 'transmissions' && parts[1]){
-          this.renderTransmission(parts[1]);
-          return;
-        }
-
-        this.renderArchive();
-      }
-
-      renderArchive(){
-        const latest = this.data.transmissions[this.data.transmissions.length - 1];
-
-        this.appEl.innerHTML = `
-          <section class="feature">
-            <div class="feature-title">Latest Transmission</div>
-            <p> TRANSMISSION ${latest.id} | ${escapeHtml(latest.title)} | ${escapeHtml(latest.dateFormatted)}</p>
-          </section>
-
-          <div class="grid" id="tx-grid"></div>
-        `;
-
-        const grid = qs('#tx-grid');
-        grid.innerHTML = this.data.transmissions.map(t => `
-          <div class="card" data-id="${escapeHtml(t.id)}">
-            <div class="card-id">TRANSMISSION ${escapeHtml(t.id)}</div>
-            <div class="card-title">${escapeHtml(t.title)}</div>
-            <div class="card-date">${escapeHtml(t.dateFormatted)}</div>
-            <div class="card-desc">${escapeHtml(t.description)}</div>
-          </div>
-        `).join('');
-
-        qsa('.card', grid).forEach(card => {
-          card.addEventListener('click', () => {
-            location.hash = `#transmissions/${card.getAttribute('data-id')}`;
-          });
-        });
-      }
-
-      displayLogger(key){
-        if(!key) return '';
-        const p = (this.data.people && this.data.people[key]) ? this.data.people[key] : null;
-        return p && p.label ? p.label : String(key).toUpperCase();
-      }
-
-      renderTransmission(id){
-        const tx = this.data.transmissions.find(t => t.id === id);
-        if(!tx){
-          this.appEl.innerHTML = `<a class="back-link" href="#transmissions">Back</a><div class="intro"><h1>Transmission Not Found</h1><p>No record for TRANSMISSION ${escapeHtml(id)}.</p></div>`;
-          return;
-        }
-
-        const elements = this.data.elements.filter(e => e.transmission_id === tx.id);
-
-        this.appEl.innerHTML = `
-          <a class="back-link" href="#transmissions">Back to Archive</a>
-
-          <div class="transmission-header">
-            <div class="transmission-id">TRANSMISSION ${escapeHtml(tx.id)}</div>
-            <div class="transmission-title">${escapeHtml(tx.title)}</div>
-            <div class="transmission-date">RECORDED: ${escapeHtml(tx.dateFormatted)}</div>
-            <div style="opacity:0.82;">${escapeHtml(tx.notes)}</div>
-          </div>
-
-          ${tx.audioUrl ? this.renderAudioPlayer(tx.audioUrl, tx.title) : `<div class="section"><div class="section-title">Audio</div><p style="opacity:0.75;">Audio file not yet linked.</p></div>`}
-
-          <div class="section">
-            <div class="section-title">Artifacts</div>
-
-            <div class="transmission-filters">
-              <input id="filter-q" type="text" placeholder="Search title, credit, notes, year, logger" autocomplete="off" />
-              <select id="filter-type">
-                <option value="">All types</option>
-                ${Array.from(new Set(elements.map(e => e.type))).sort().map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('')}
-              </select>
-            </div>
-
-            <table class="breakdown-table">
-              <thead>
-                <tr>
-                  <th>TIME</th>
-                  <th>TYPE</th>
-                  <th>TITLE</th>
-                  <th>CREDIT</th>
-                  <th>YEAR</th>
-                  <th>LOGGED</th>
-                  <th>CONF</th>
-                </tr>
-              </thead>
-              <tbody id="elements-body"></tbody>
-            </table>
-          </div>
-        `;
-
-        const body = qs('#elements-body');
-
-        const renderRows = () => {
-          const q = (qs('#filter-q').value || '').trim().toLowerCase();
-          const type = qs('#filter-type').value;
-
-          const rows = elements.filter(e => {
-            if(type && e.type !== type) return false;
-            if(!q) return true;
-            const logger = this.displayLogger(e.logged_by);
-            const blob = `${e.title} ${e.primary_credit} ${e.notes || ''} ${e.source || ''} ${e.year || ''} ${logger}`.toLowerCase();
-            return blob.includes(q);
-          });
-
-          body.innerHTML = rows.map(e => {
-            const confClass = e.confidence === 'high' ? 'confidence-high' : (e.confidence === 'medium' ? 'confidence-medium' : 'confidence-low');
-            const year = (e.year === null || typeof e.year === 'undefined') ? '' : String(e.year);
-            const logger = this.displayLogger(e.logged_by);
-            const titleHtml = `<span class="artifact-link" data-eid="${escapeHtml(e.id)}">${escapeHtml(e.title)}</span>`;
-            return `
-              <tr>
-                <td>${escapeHtml(e.start_time)}-${escapeHtml(e.end_time)}</td>
-                <td><span class="type-badge">${escapeHtml(e.type)}</span></td>
-                <td>${titleHtml}</td>
-                <td>${escapeHtml(e.primary_credit)}</td>
-                <td>${escapeHtml(year)}</td>
-                <td>${escapeHtml(logger)}</td>
-                <td class="${confClass}">${escapeHtml(String(e.confidence || '').toUpperCase())}</td>
-              </tr>
-            `;
-          }).join('');
-
-          if(rows.length === 0){
-            body.innerHTML = `<tr><td colspan="7" style="opacity:0.7;">No matches.</td></tr>`;
-          }
-
-          qsa('.artifact-link', body).forEach(el => {
-            el.addEventListener('click', () => {
-              const eid = el.getAttribute('data-eid');
-              this.openArtifactModal(tx.id, eid);
-            });
-          });
-        };
-
-        qs('#filter-q').addEventListener('input', renderRows);
-        qs('#filter-type').addEventListener('change', renderRows);
-        renderRows();
-      }
-
-      renderAudioPlayer(url, title){
-        const safeTitle = escapeHtml(title);
-        setTimeout(() => this.bindAudio(url), 0);
-        return `
-          <div class="audio-player" id="audio-player">
-            <div class="section-title">Audio</div>
-            <div class="audio-controls">
-              <button class="play-btn" id="play-btn" type="button">▶</button>
-              <div class="time-display" id="time-display">00:00 / 00:00</div>
-              <div class="timeline" id="timeline"><div class="timeline-progress" id="timeline-progress"></div><div class="timeline-handle" id="timeline-handle" style="left:0%"></div></div>
-              <div class="volume-control">
-                <div class="volume-icon">VOL</div>
-                <div class="volume-slider" id="vol"><div class="volume-level" id="vol-level"></div></div>
-              </div>
-            </div>
-            <div class="track-info">${safeTitle} | ${escapeHtml(url)}</div>
-          </div>
-        `;
-      }
-
-      bindAudio(url){
-        const playBtn = qs('#play-btn');
-        const timeEl = qs('#time-display');
-        const timeline = qs('#timeline');
-        const prog = qs('#timeline-progress');
-        const handle = qs('#timeline-handle');
-        const vol = qs('#vol');
-        const volLevel = qs('#vol-level');
-
-        if(!playBtn || !timeline || !vol) return;
-
-        const audio = new Audio(url);
-        audio.preload = 'metadata';
-        audio.volume = 1;
-        this._audio = audio;
-
-        const fmt = (t) => {
-          if(!isFinite(t)) return '00:00';
-          const m = Math.floor(t / 60);
-          const s = Math.floor(t % 60);
-          return `${pad2(m)}:${pad2(s)}`;
-        };
-
-        const sync = () => {
-          const cur = audio.currentTime || 0;
-          const dur = audio.duration || 0;
-          timeEl.textContent = `${fmt(cur)} / ${fmt(dur)}`;
-
-          if(dur > 0){
-            const p = Math.max(0, Math.min(1, cur / dur));
-            const pct = (p * 100);
-            prog.style.width = `${pct}%`;
-            handle.style.left = `${pct}%`;
-          }
-        };
-
-        audio.addEventListener('timeupdate', sync);
-        audio.addEventListener('loadedmetadata', sync);
-        audio.addEventListener('ended', () => {
-          playBtn.textContent = '▶';
-        });
-
-        audio.addEventListener('error', () => {
-          playBtn.disabled = true;
-          timeEl.textContent = 'AUDIO NOT FOUND';
-        });
-
-        playBtn.addEventListener('click', () => {
-          if(audio.paused){
-            audio.play();
-            playBtn.textContent = '❚❚';
-          } else {
-            audio.pause();
-            playBtn.textContent = '▶';
-          }
-        });
-
-        const seek = (clientX) => {
-          const r = timeline.getBoundingClientRect();
-          const p = (clientX - r.left) / r.width;
-          const clamped = Math.max(0, Math.min(1, p));
-          if(audio.duration){
-            audio.currentTime = clamped * audio.duration;
-          }
-        };
-
-        timeline.addEventListener('mousedown', (e) => seek(e.clientX));
-        timeline.addEventListener('touchstart', (e) => {
-          if(e.touches && e.touches[0]) seek(e.touches[0].clientX);
-        }, {passive:true});
-
-        const setVol = (clientX) => {
-          const r = vol.getBoundingClientRect();
-          const p = (clientX - r.left) / r.width;
-          const clamped = Math.max(0, Math.min(1, p));
-          audio.volume = clamped;
-          volLevel.style.width = `${clamped * 100}%`;
-        };
-
-        vol.addEventListener('mousedown', (e) => setVol(e.clientX));
-        vol.addEventListener('touchstart', (e) => {
-          if(e.touches && e.touches[0]) setVol(e.touches[0].clientX);
-        }, {passive:true});
-
-        sync();
-      }
-
-      renderInfo(){
-        this.appEl.innerHTML = `
-          <section class="intro">
-            <h1>Info</h1>
-            <p>Recovered discussion, archive images, and update channels for newly linked transmissions.</p>
-          </section>
-
-          <div class="info-shell">
-            <div class="info-grid">
-
-              <div class="info-left">
-                <div class="panel full-height">
-                  <div class="section-title">DISCUSSION</div>
-                  <div class="chat-container" id="chat-scroll">
-                    <div class="chat-log" id="chat-log"></div>
-                  </div>
-
-                  <div class="chat-input-area">
-                    <input id="chat-input" type="text" placeholder="ENTER NOTE..." autocomplete="off" />
-                    <button class="btn" id="chat-send" type="button">SEND</button>
-                  </div>
-                </div>
-              </div>
-
-              <div class="info-right">
-                <div class="panel">
-                  <div class="section-title">ARCHIVE IMAGES</div>
-                  <div class="slideshow-stage" id="stage"><div class="slideshow-caption" id="stage-caption"></div></div>
-                </div>
-
-                <div class="panel">
-                  <div class="section-title">STAY UPDATED</div>
-                  <div class="stay-grid">
-                    <div>
-                      <input id="email" type="email" placeholder="EMAIL" autocomplete="off" />
-                      <button class="btn" id="sub" type="button" style="width:100%;">SUBSCRIBE</button>
-                      <div class="message" id="msg"></div>
-                    </div>
-
-                    <div class="rss-block">
-                      <div style="opacity:0.82;margin:0 0 10px;">Podcast feed (RSS)</div>
-                      <input id="rss-url" type="text" value="https://wlsn.space/feed.xml" readonly />
-                      <button class="btn" id="copy-rss" type="button" style="width:100%;">COPY FEED URL</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        `;
-
-        this.bindChat();
-        this.bindNewsletter();
-        this.bindSlideshow();
-
-        const copyBtn = qs('#copy-rss');
-        const rssInput = qs('#rss-url');
-        if(copyBtn && rssInput){
-          copyBtn.addEventListener('click', async () => {
-            try{
-              await navigator.clipboard.writeText(rssInput.value);
-              const old = copyBtn.textContent;
-              copyBtn.textContent = 'COPIED';
-              setTimeout(() => copyBtn.textContent = old, 900);
-            }catch(e){
-              rssInput.focus();
-              rssInput.select();
-            }
-          });
-        }
-      }
-
-      bindChat(){
-        const log = qs('#chat-log');
-        const scroller = qs('#chat-scroll');
-        const input = qs('#chat-input');
-        const send = qs('#chat-send');
-        if(!log || !input || !send || !scroller) return;
-
-        const displayName = (key) => {
-          const p = (this.data.people && this.data.people[key]) ? this.data.people[key] : null;
-          return p && p.label ? p.label : String(key).toUpperCase();
-        };
-
-        const pushMsg = (whoKey, text, meta) => {
-          const ts = new Date();
-          const stamp = `${pad2(ts.getHours())}:${pad2(ts.getMinutes())}`;
-          const extra = meta ? `<span class="chat-location">${escapeHtml(meta)}</span>` : '';
-
-          const isUser = whoKey === 'USER';
-          const cls = isUser ? 'chat-user' : 'chat-bot';
-          const name = isUser ? (this.session.alias || 'UNIDENTIFIED') : displayName(whoKey);
-
-          const el = document.createElement('div');
-          el.className = 'chat-msg';
-          el.innerHTML = `
-            <span class="chat-timestamp">${stamp}</span>
-            <span class="${cls}">${escapeHtml(name)}</span>${extra}
-            <div style="opacity:0.86; margin-left:42px;">${escapeHtml(text)}</div>
-          `;
-          log.appendChild(el);
-
-          // Keep the box fixed, just scroll the inside.
-          scroller.scrollTop = scroller.scrollHeight;
-
-          // Optional: prevent runaway DOM growth after a long time.
-          const MAX = 220;
-          while(log.children.length > MAX){
-            log.removeChild(log.firstChild);
-          }
-        };
-
-        const postUser = () => {
-          const t = (input.value || '').trim();
-          if(!t) return;
-          input.value = '';
-          pushMsg('USER', t);
-        };
-
-        send.addEventListener('click', postUser);
-        input.addEventListener('keydown', (e) => {
-          if(e.key === 'Enter') postUser();
-        });
-
-        // Seed
-        for(let i=0;i<6;i++){
-          const m = this.botMessages[i];
-          const b = this.chatBots[m.bot];
-          pushMsg(b.key, m.text, b.location);
-        }
-
-        this._chatIdx = 6;
-
-        // Continue indefinitely, always scrolling within the fixed box.
-        this._chatTimer = setInterval(() => {
-          if(!qs('#chat-log')) return;
-          const m = this.botMessages[this._chatIdx % this.botMessages.length];
-          const b = this.chatBots[m.bot];
-          pushMsg(b.key, m.text, b.location);
-          this._chatIdx += 1;
-        }, 3800);
-      }
-
-      bindNewsletter(){
-        const email = qs('#email');
-        const sub = qs('#sub');
-        const msg = qs('#msg');
-        if(!email || !sub || !msg) return;
-
-        const show = (text, ok=true) => {
-          msg.className = 'message ' + (ok ? 'success' : 'error');
-          msg.style.display = 'block';
-          msg.textContent = text;
-        };
-
-        sub.addEventListener('click', () => {
-          const v = (email.value || '').trim();
-          if(!v || !v.includes('@')){
-            show('INVALID EMAIL', false);
-            return;
-          }
-          show('RECEIVED. INDEXING PENDING.', true);
-          email.value = '';
-        });
-      }
-
-      bindSlideshow(){
-        const stage = qs('#stage');
-        const caption = qs('#stage-caption');
-        if(!stage) return;
-
-        stage.innerHTML = '';
-
-        const first = (this.slides && this.slides[0]) ? this.slides[0] : null;
-        if(!first || !first.src){
-          stage.innerHTML = `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0.75;letter-spacing:2px;font-size:10px;">NO IMAGES LINKED YET</div>`;
-          if(caption) caption.textContent = '';
-          return;
-        }
-
-        const img = document.createElement('img');
-        img.src = first.src;
-        img.alt = first.caption || 'WLSN image';
-        img.classList.add('active');
-        img.addEventListener('error', () => {
-          stage.innerHTML = `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0.75;letter-spacing:2px;font-size:10px;">NO IMAGES LINKED YET</div>`;
-          if(caption) caption.textContent = '';
-        });
-        stage.appendChild(img);
-
-        if(caption) caption.textContent = first.caption || '';
-      }
-
-      // Artifact modal
-      bindArtifactModal(){
-        const modal = qs('#artifact-modal');
-        const closeBtn = qs('#am-close');
-        const playBtn = qs('#am-play');
-        const stopBtn = qs('#am-stop');
-
-        const close = () => {
-          if(!modal) return;
-          modal.classList.remove('active');
-          modal.setAttribute('aria-hidden','true');
-          this.stopModalAudio();
-        };
-
-        if(closeBtn) closeBtn.addEventListener('click', close);
-        if(modal){
-          modal.addEventListener('click', (e) => {
-            if(e.target === modal) close();
-          });
-        }
-        document.addEventListener('keydown', (e) => {
-          if(e.key === 'Escape' && modal && modal.classList.contains('active')) close();
-        });
-
-        if(playBtn){
-          playBtn.addEventListener('click', () => {
-            if(!this._modalContext) return;
-            this.playModalClip();
-          });
-        }
-        if(stopBtn){
-          stopBtn.addEventListener('click', () => {
-            this.stopModalAudio();
-          });
-        }
-      }
-
-      stopModalAudio(){
-        if(this._modalTick){
-          clearInterval(this._modalTick);
-          this._modalTick = null;
-        }
-        if(this._modalAudio){
-          try{ this._modalAudio.pause(); }catch(e){}
-          this._modalAudio = null;
-        }
-        this._modalStopAt = null;
-        const playBtn = qs('#am-play');
-        if(playBtn) playBtn.textContent = 'PLAY CLIP';
-      }
-
-      openArtifactModal(txId, elementId){
-        const modal = qs('#artifact-modal');
-        const titleEl = qs('#am-title');
-        const subEl = qs('#am-sub');
-        const grid = qs('#am-grid');
-        const timeEl = qs('#am-time');
-
-        const tx = this.data.transmissions.find(t => t.id === txId);
-        const el = this.data.elements.find(e => e.id === elementId);
-        if(!modal || !tx || !el || !grid) return;
-
-        this._modalContext = { tx, element: el };
-        this.stopModalAudio();
-
-        const logger = this.displayLogger(el.logged_by);
-        const year = (el.year === null || typeof el.year === 'undefined') ? '' : String(el.year);
-        const conf = String(el.confidence || '').toUpperCase();
-
-        if(titleEl) titleEl.textContent = el.title ? String(el.title).toUpperCase() : 'ARTIFACT';
-        if(subEl) subEl.textContent = `TRANSMISSION ${tx.id} | ${el.start_time}-${el.end_time} | ${el.type}`.toUpperCase();
-        if(timeEl) timeEl.textContent = `${el.start_time}-${el.end_time}`;
-
-        grid.innerHTML = `
-          <div class="artifact-kv"><div class="k">Type</div><div class="v">${escapeHtml(el.type)}</div></div>
-          <div class="artifact-kv"><div class="k">Confidence</div><div class="v">${escapeHtml(conf)}</div></div>
-          <div class="artifact-kv"><div class="k">Credit</div><div class="v">${escapeHtml(el.primary_credit)}</div></div>
-          <div class="artifact-kv"><div class="k">Year</div><div class="v">${escapeHtml(year)}</div></div>
-          <div class="artifact-kv"><div class="k">Source</div><div class="v">${escapeHtml(el.source || '')}</div></div>
-          <div class="artifact-kv"><div class="k">Logged By</div><div class="v">${escapeHtml(logger)}</div></div>
-          <div class="artifact-kv artifact-notes"><div class="k">Notes</div><div class="v">${escapeHtml(el.notes || '')}</div></div>
-        `;
-
-        modal.classList.add('active');
-        modal.setAttribute('aria-hidden','false');
-      }
-
-      playModalClip(){
-        const playBtn = qs('#am-play');
-        if(!this._modalContext) return;
-
-        const { tx, element } = this._modalContext;
-        if(!tx.audioUrl){
-          if(playBtn) playBtn.textContent = 'NO AUDIO';
-          return;
-        }
-
-        // Toggle
-        if(this._modalAudio && !this._modalAudio.paused){
-          this._modalAudio.pause();
-          if(playBtn) playBtn.textContent = 'PLAY CLIP';
-          return;
-        }
-
-        const startS = timeToSeconds(element.start_time);
-        const endS = timeToSeconds(element.end_time);
-        const stopAt = Math.max(startS, endS);
-
-        const a = this._modalAudio || new Audio(tx.audioUrl);
-        a.preload = 'auto';
-        a.volume = 1;
-        this._modalAudio = a;
-        this._modalStopAt = stopAt;
-
-        const begin = () => {
-          try{
-            a.currentTime = startS;
-          }catch(e){}
-          a.play().then(() => {
-            if(playBtn) playBtn.textContent = 'PAUSE';
-          }).catch(() => {
-            if(playBtn) playBtn.textContent = 'BLOCKED';
-          });
-
-          if(this._modalTick) clearInterval(this._modalTick);
-          this._modalTick = setInterval(() => {
-            if(!this._modalAudio) return;
-            if(this._modalAudio.currentTime >= this._modalStopAt){
-              this.stopModalAudio();
-            }
-          }, 90);
-        };
-
-        if(a.readyState >= 1){
-          begin();
-        } else {
-          a.addEventListener('loadedmetadata', begin, { once:true });
-          a.addEventListener('error', () => {
-            if(playBtn) playBtn.textContent = 'AUDIO NOT FOUND';
-          }, { once:true });
-        }
-      }
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const app = new App();
-      app.init();
-    });
-  </script>
-</body>
-</html>
+          {bot:4,text:"
