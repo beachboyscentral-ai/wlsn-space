@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WLSN | Western Light and Sound Network</title>
+<style>
+:root{
+  --bg:#0b0e0b;
+  --green:#2ad01f;
+  --green-d:#104a0c;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--green);font-family:Courier New, monospace}
+a{color:var(--green);text-decoration:none}
+header{border-bottom:1px solid var(--green);padding:24px}
+.brand{font-size:36px;letter-spacing:6px}
+.sub{font-size:11px;color:#3d8b3a;margin-top:4px}
+nav{margin-top:16px}
+nav a{
+  display:inline-block;
+  border:1px solid var(--green);
+  padding:10px 18px;
+  margin-right:8px;
+}
+nav a.active{
+  box-shadow:0 0 10px rgba(42,208,31,.7);
+}
+main{padding:24px;max-width:1200px;margin:0 auto}
+.panel{
+  border:1px solid var(--green);
+  padding:16px;
+  margin-bottom:24px;
+}
+h2{margin:0 0 12px 0;font-size:14px;letter-spacing:2px}
+.audio-bar{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+audio{width:100%}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{border:1px solid var(--green);padding:8px;text-align:left}
+th{color:#9bff8e}
+.type-tag{border:1px solid var(--green);padding:2px 6px;font-size:10px}
+.footer{border-top:1px solid var(--green);padding:16px;text-align:center;font-size:10px;color:#3d8b3a}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">WLSN█</div>
+  <div class="sub">WESTERN LIGHT AND SOUND NETWORK<br>SIGNAL ARCHIVE</div>
+  <nav>
+    <a href="#/archive" id="nav-archive">BROADCAST ARCHIVE</a>
+    <a href="#/info" id="nav-info">INFO</a>
+  </nav>
+</header>
+
+<main id="app"></main>
+
+<div class="footer">
+WLSN ARCHIVE SYSTEM | EST. 1967 | DECLASSIFIED 2025<br>
+Produced by Brain Crampsmen for WLSN under the ONE Signal distribution mark.
+</div>
+
+<script>
+const app = document.getElementById('app');
+const navArchive = document.getElementById('nav-archive');
+const navInfo = document.getElementById('nav-info');
+
+function setActive(hash){
+  navArchive.classList.toggle('active', hash.startsWith('#/archive') || hash.startsWith('#/transmissions'));
+  navInfo.classList.toggle('active', hash.startsWith('#/info'));
+}
+
+function renderArchive(){
+  app.innerHTML = `
+  <div class="panel">
+    <h2>LATEST TRANSMISSION</h2>
+    <a href="#/transmissions/002">Transmission 002</a>
+  </div>
+  <div class="panel">
+    <h2>TRANSMISSIONS</h2>
+    <a href="#/transmissions/002">002</a>
+  </div>`;
+}
+
+function renderInfo(){
+  app.innerHTML = `
+  <div class="panel">
+    <h2>INFO</h2>
+    <p>Recovered discussion, archive images, and update channels for newly linked transmissions.</p>
+  </div>`;
+}
+
+function renderTransmission002(){
+  app.innerHTML = `
+  <div class="panel">
+    <h2>TRANSMISSION 002</h2>
+    <div class="audio-bar">
+      <audio controls src="audio/transmission_002.mp3"></audio>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>ARTIFACTS</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>TIME</th>
+            <th>TYPE</th>
+            <th>TITLE</th>
+            <th>ARTIST / SOURCE</th>
+            <th>YEAR</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td></td><td><span class="type-tag">SFX</span></td><td>Rays</td><td>Radio FX Library</td><td>1960s</td></tr>
+          <tr><td></td><td><span class="type-tag">MUSIC</span></td><td>It Came from Outer Space</td><td>Herman Stein</td><td>1953</td></tr>
+          <tr><td></td><td><span class="type-tag">JINGLE</span></td><td>WHBQ Ident</td><td>WHBQ Memphis</td><td>1960s</td></tr>
+          <tr><td></td><td><span class="type-tag">NARRATION</span></td><td>Robinson Crusoe on Mars</td><td>Adam West</td><td>1964</td></tr>
+          <tr><td></td><td><span class="type-tag">COMMERCIAL</span></td><td>Pillsbury Cookies</td><td>Benton & Bowles</td><td>1960s</td></tr>
+          <tr><td></td><td><span class="type-tag">COMMERCIAL</span></td><td>Camel Cigarettes</td><td>R.J. Reynolds</td><td>1960s</td></tr>
+          <tr><td></td><td><span class="type-tag">SONG</span></td><td>It's You</td><td>The Millennium</td><td>1968</td></tr>
+          <tr><td></td><td><span class="type-tag">SONG</span></td><td>2002 - A Hit Song</td><td>The Free Design</td><td>1967</td></tr>
+          <tr><td></td><td><span class="type-tag">SONG</span></td><td>It's My Party</td><td>Lesley Gore</td><td>1963</td></tr>
+          <tr><td></td><td><span class="type-tag">SONG</span></td><td>God Only Knows</td><td>The Beach Boys</td><td>1966</td></tr>
+          <tr><td></td><td><span class="type-tag">SONG</span></td><td>In My Lonely Room</td><td>Martha Reeves & The Vandellas</td><td>1964</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function router(){
+  const hash = location.hash || '#/archive';
+  setActive(hash);
+  if(hash === '#/archive') renderArchive();
+  else if(hash === '#/info') renderInfo();
+  else if(hash === '#/transmissions/002') renderTransmission002();
+  else renderArchive();
+}
+
+window.addEventListener('hashchange', router);
+router();
+</script>
+</body>
+</html>
