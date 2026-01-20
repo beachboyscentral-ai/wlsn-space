@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WLSN | Western Light and Sound Network</title>
+
+  <!-- Favicons (keep these files in your site root) -->
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+  <!-- Optional (later): RSS feed for podcatchers -->
+  <!-- <link rel="alternate" type="application/rss+xml" title="WLSN Broadcast Archive" href="feed.xml"> -->
+
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --crt-green:#28d428;
+      --crt-dim:#0d5a0d;
+      --crt-bg:#0b110b;
+      --crt-glow:rgba(40,212,40,0.55);
+      --mono:'Courier New',monospace;
+    }
+
+    body{
+      font-family:var(--mono);
+      background:var(--crt-bg);
+      color:var(--crt-green);
+      line-height:1.6;
+      font-size:13px;
+      text-shadow:0 0 3px var(--crt-glow);
+    }
+
+    body::before{
+      content:'';
+      position:fixed;top:0;left:0;width:100%;height:100%;
+      background:repeating-linear-gradient(
+        0deg,
+        rgba(0,0,0,0.16) 0px,
+        rgba(0,0,0,0.16) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      pointer-events:none;
+      z-index:9999;
+      opacity:0.9;
+    }
+
+    .container{max-width:1000px;margin:0 auto;padding:40px 20px}
+
+    header{
+      border-top:2px solid var(--crt-green);
+      border-bottom:2px solid var(--crt-green);
+      padding:20px 0;
+      margin-bottom:28px;
+    }
+
+    .logo{
+      font-size:36px;
+      font-weight:700;
+      letter-spacing:12px;
+      margin-bottom:10px;
+      text-shadow:0 0 8px var(--crt-glow);
+      line-height:1.1;
+    }
+
+    /* Cursor sizing and alignment */
+    .logo .cursor{
+      font-size:22px;
+      line-height:1;
+      display:inline-block;
+      vertical-align:baseline;
+      margin-left:8px;
+      animation:blink 1s infinite;
+      position:relative;
+      top:-5px;
+      opacity:0.95;
+    }
+
+    .tagline{
+      font-size:11px;
+      letter-spacing:2px;
+      color:#4a9a4a;
+      text-transform:uppercase;
+      opacity:0.75;
+    }
+
+    /* Make "Signal Archive" slightly blurrier */
+    .tagline-sub{
+      margin-top:2px;
+      opacity:0.62;
+      filter: blur(1.15px);
+    }
+
+    /* Session indicator is its own panel */
+    .session-panel{
+      margin-top:14px;
+      border:1px solid var(--crt-dim);
+      background:rgba(0,0,0,0.28);
+      padding:10px 12px;
+      font-size:10px;
+      letter-spacing:2px;
+      color:var(--crt-dim);
+      opacity:0.95;
+      filter: blur(0.25px);
+    }
+    .session-panel b{color:var(--crt-green);font-weight:400;filter:none}
+
+    nav{
+      margin-top:18px;
+      padding-top:18px;
+      border-top:1px solid var(--crt-dim);
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    /* Sitewide button rule:
+       - default: black fill + green outline
+       - hover: green fill + glow
+       - active (current page): subtle green tint + glow, still readable at a glance
+    */
+    .btn,
+    .btn:visited,
+    nav a,
+    nav a:visited{
+      display:inline-block;
+      background:transparent;
+      color:var(--crt-green);
+      padding:12px 18px;
+      text-decoration:none;
+      font-size:10px;
+      text-transform:uppercase;
+      letter-spacing:2px;
+      font-weight:700;
+      border:2px solid var(--crt-green);
+      cursor:pointer;
+      transition:background .08s, color .08s, box-shadow .08s, opacity .08s;
+    }
+
+    .btn:hover,
+    nav a:hover{
+      background:var(--crt-green);
+      color:var(--crt-bg);
+      box-shadow:0 0 14px rgba(0,255,102,0.25);
+    }
+
+    nav a.active{
+      background:rgba(40,212,40,0.14);
+      box-shadow:0 0 14px rgba(0,255,102,0.18);
+    }
+
+    /* keep nav alignment even */
+    nav a{
+      text-align:center;
+      min-width:200px;
+    }
+
+    .intro{
+      border:1px solid var(--crt-dim);
+      border-left:4px solid var(--crt-green);
+      padding:26px;
+      margin-bottom:24px;
+      background:rgba(0,0,0,0.18);
+    }
+    .intro h1{
+      font-size:14px;
+      margin-bottom:14px;
+      text-transform:uppercase;
+      letter-spacing:2px;
+      font-weight:700;
+      border-bottom:1px solid var(--crt-green);
+      padding-bottom:8px;
+    }
+    .intro p{margin-bottom:12px;line-height:1.8;opacity:0.86}
+
+    .back-link{
+      display:inline-block;
+      margin-bottom:18px;
+      color:var(--crt-green);
+      text-decoration:none;
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      opacity:0.7;
+    }
+    .back-link:hover{opacity:1}
+    .back-link::before{content:'← '}
+
+    .grid{display:block;margin-top:16px;border:1px solid var(--crt-dim)}
+    .card{
+      border-bottom:1px solid var(--crt-dim);
+      padding:20px 18px;
+      cursor:pointer;
+      background:rgba(0,0,0,0.10);
+    }
+    .card:hover{background:rgba(51,255,51,0.05)}
+    .card-id{font-size:10px;color:var(--crt-green);margin-bottom:8px;letter-spacing:1.5px;font-weight:700;opacity:0.7}
+    .card-title{font-size:16px;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
+    .card-date{font-size:10px;color:var(--crt-dim);margin-bottom:10px;opacity:0.7}
+    .card-desc{font-size:13px;line-height:1.6;opacity:0.82}
+
+    /* Feature block on archive landing */
+    .feature{
+      border:1px solid var(--crt-dim);
+      border-left:4px solid var(--crt-green);
+      padding:18px;
+      margin:18px 0 22px;
+      background:rgba(0,0,0,0.18);
+    }
+    .feature .feature-title{
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:2px;
+      opacity:0.85;
+      margin-bottom:10px;
+      border-bottom:1px solid var(--crt-green);
+      padding-bottom:8px;
+      font-weight:700;
+    }
+    .feature p{opacity:0.82}
+
+    /* Badges (not buttons) */
+    .badge{
+      display:inline-block;
+      padding:6px 10px;
+      border:1px dashed var(--crt-dim);
+      color:var(--crt-green);
+      background:rgba(0,0,0,0.22);
+      letter-spacing:2px;
+      font-size:10px;
+      cursor:default;
+      user-select:none;
+      opacity:0.95;
+    }
+    .badge.received{border-color:var(--crt-green)}
+    .badge.archived{border-color:var(--crt-dim);filter:blur(0.15px)}
+    .badge:hover{background:rgba(0,0,0,0.22);box-shadow:none}
+
+    .transmission-header{
+      border:2px solid var(--crt-green);
+      padding:26px;
+      margin-bottom:22px;
+      background:rgba(0,0,0,0.14);
+    }
+    .transmission-id{font-size:10px;margin-bottom:10px;letter-spacing:2px;font-weight:700;opacity:0.7}
+    .transmission-title{font-size:22px;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+    .transmission-date{font-size:10px;color:var(--crt-dim);margin-bottom:14px;opacity:0.7}
+
+    .section{
+      border:1px solid var(--crt-dim);
+      border-left:3px solid var(--crt-dim);
+      padding:18px;
+      margin-bottom:18px;
+      background:rgba(0,0,0,0.14);
+    }
+    .section-title{
+      font-size:11px;text-transform:uppercase;letter-spacing:2px;margin-bottom:14px;
+      border-bottom:1px solid var(--crt-green);padding-bottom:8px;font-weight:700
+    }
+
+    .breakdown-table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:11px;
+      border:1px solid var(--crt-dim);
+      margin:14px 0 18px;
+    }
+    .breakdown-table thead{background:rgba(51,255,51,0.08)}
+    .breakdown-table th{
+      padding:10px 12px;text-align:left;font-weight:700;letter-spacing:1.5px;font-size:10px;
+      border-right:1px solid var(--crt-dim);border-bottom:1px solid var(--crt-green)
+    }
+    .breakdown-table td{
+      padding:12px 12px;border-bottom:1px solid var(--crt-dim);border-right:1px solid var(--crt-dim);
+      overflow-wrap:anywhere;word-break:break-word;
+    }
+    .breakdown-table tbody tr:hover{background:rgba(51,255,51,0.05)}
+
+    .element-link{color:var(--crt-green);text-decoration:underline;cursor:pointer;font-weight:700}
+    .element-link:hover{color:#fff;text-shadow:0 0 10px var(--crt-glow)}
+    .type-badge{display:inline-block;padding:2px 6px;font-size:9px;letter-spacing:1px;font-weight:700;text-transform:uppercase;border:1px solid var(--crt-dim);opacity:0.9}
+
+    .confidence-high{color:var(--crt-green);font-weight:700}
+    .confidence-medium{color:var(--crt-dim);font-weight:700}
+    .confidence-low{color:#ff3333;font-weight:700}
+
+    /* Filters on transmission pages */
+    .transmission-filters{
+      display:flex;gap:12px;align-items:center;flex-wrap:wrap;
+      margin:16px 0;padding:12px;border:1px solid var(--crt-dim);background:rgba(0,0,0,0.22);
+    }
+    .transmission-filters input,
+    .transmission-filters select{
+      flex:1;min-width:220px;
+      background:rgba(0,0,0,0.35);
+      border:1px solid var(--crt-green);
+      color:var(--crt-green);
+      padding:10px 12px;
+      font-family:var(--mono);
+      font-size:12px;
+      outline:none;
+    }
+    .transmission-filters select{flex:0.65}
+
+    /* Audio player */
+    .audio-player{border:1px solid var(--crt-dim);padding:16px;margin:16px 0;background:rgba(0,0,0,0.26)}
+    .audio-controls{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+    .play-btn{
+      width:40px;height:40px;border:2px solid var(--crt-green);
+      background:transparent;color:var(--crt-green);cursor:pointer;
+      font-family:var(--mono);font-size:16px;transition:all .08s
+    }
+    .play-btn:hover{background:var(--crt-green);color:var(--crt-bg)}
+    .play-btn:disabled{opacity:0.35;cursor:not-allowed}
+    .time-display{font-family:var(--mono);font-size:11px;color:var(--crt-green);letter-spacing:1px;min-width:110px}
+    .timeline{flex:1;min-width:180px;height:4px;background:var(--crt-dim);position:relative;cursor:pointer}
+    .timeline-progress{height:100%;background:var(--crt-green);width:0%}
+    .timeline-handle{
+      position:absolute;top:-4px;width:12px;height:12px;background:var(--crt-green);
+      border:1px solid var(--crt-green);transform:translateX(-50%);cursor:pointer;
+      box-shadow:0 0 5px var(--crt-glow)
+    }
+    .volume-control{display:flex;align-items:center;gap:10px}
+    .volume-icon{font-family:var(--mono);font-size:11px;color:var(--crt-green);letter-spacing:1px;opacity:0.9}
+    .volume-slider{width:90px;height:4px;background:var(--crt-dim);position:relative;cursor:pointer}
+    .volume-level{height:100%;background:var(--crt-green);width:100%}
+    .track-info{font-family:var(--mono);font-size:10px;color:var(--crt-dim);margin-top:8px;opacity:0.75}
+
+    /* INFO page layout */
+    .info-grid{
+      display:grid;
+      grid-template-columns: 1.35fr 0.95fr;
+      gap:16px;
+      align-items:start;
+    }
+
+    .chat-container{
+      border:1px solid var(--crt-dim);
+      height:520px;
+      overflow:hidden;
+      background:rgba(0,0,0,0.28);
+      position:relative;
+    }
+    .chat-log{
+      font-size:11px;
+      line-height:2.2;
+      position:absolute;
+      width:calc(100% - 30px);
+      left:15px;
+      top:0;
+    }
+    .chat-msg{margin-bottom:15px}
+    .chat-user{color:var(--crt-green);font-weight:700}
+    .chat-bot{color:var(--crt-dim);font-weight:700}
+    .chat-location{color:var(--crt-dim);font-size:10px;margin-left:6px}
+    .chat-timestamp{color:var(--crt-dim);font-size:10px;margin-right:8px}
+
+    .chat-input-area{
+      margin-top:12px;
+      border:1px solid var(--crt-dim);
+      padding:14px;
+      background:rgba(0,0,0,0.22);
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .chat-input-area input{
+      flex:1;
+      font-family:var(--mono);
+      font-size:11px;
+      padding:10px 12px;
+      border:1px solid var(--crt-green);
+      background:rgba(0,0,0,0.35);
+      color:var(--crt-green);
+      outline:none;
+    }
+    .chat-input-area button{min-width:110px}
+
+    .newsletter-form{
+      border:1px solid var(--crt-dim);
+      border-left:4px solid var(--crt-green);
+      padding:18px;
+      background:rgba(0,0,0,0.22);
+    }
+    .newsletter-form h2{
+      font-size:12px;text-transform:uppercase;margin-bottom:12px;
+      border-bottom:1px solid var(--crt-green);padding-bottom:8px
+    }
+    .newsletter-form .subcopy{
+      font-size:11px;
+      opacity:0.78;
+      margin-bottom:12px;
+      line-height:1.7;
+    }
+    .newsletter-form input{
+      width:100%;
+      font-family:var(--mono);
+      font-size:11px;
+      padding:10px 12px;
+      border:1px solid var(--crt-green);
+      background:rgba(0,0,0,0.35);
+      color:var(--crt-green);
+      margin-bottom:10px;
+      outline:none;
+    }
+    .newsletter-form button{width:100%}
+    .newsletter-form .privacy{font-size:10px;margin-top:10px;opacity:0.62}
+    .newsletter-form .message{margin-top:10px;padding:10px;border:1px solid var(--crt-green);font-size:11px;display:none}
+    .newsletter-form .message.success{color:var(--crt-green)}
+    .newsletter-form .message.error{color:#ff3333;border-color:#ff3333}
+
+    /* Slideshow block */
+    .slideshow-box{
+      margin-top:16px;
+      border:1px solid var(--crt-dim);
+      background:rgba(0,0,0,0.22);
+      padding:14px;
+    }
+    .slideshow-stage{
+      position:relative;
+      width:100%;
+      aspect-ratio: 16 / 9;
+      border:1px solid var(--crt-dim);
+      overflow:hidden;
+      background:#000;
+    }
+    .slideshow-stage img{
+      position:absolute;inset:0;
+      width:100%;height:100%;
+      object-fit:cover;
+      opacity:0;
+      transition:opacity 1.2s ease;
+      filter: grayscale(1) contrast(1.05) brightness(0.9) blur(0.2px);
+      transform:scale(1.01);
+    }
+    .slideshow-stage img.active{opacity:1}
+    .slideshow-stage::after{
+      content:'';
+      position:absolute;inset:0;
+      background:repeating-linear-gradient(
+        0deg,
+        rgba(0,0,0,0.20) 0px,
+        rgba(0,0,0,0.20) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      mix-blend-mode:overlay;
+      opacity:0.55;
+      pointer-events:none;
+    }
+    .slideshow-caption{
+      position:absolute;
+      left:10px;right:10px;bottom:10px;
+      padding:8px 10px;
+      border:1px solid var(--crt-dim);
+      background:rgba(0,0,0,0.55);
+      color:var(--crt-green);
+      font-size:10px;
+      letter-spacing:1px;
+      opacity:0.9;
+      filter: blur(0.15px);
+    }
+
+    footer{
+      margin-top:54px;
+      padding-top:18px;
+      border-top:1px solid var(--crt-dim);
+      font-size:9px;
+      color:var(--crt-dim);
+      text-align:center;
+      opacity:0.62;
+      line-height:1.8;
+    }
+
+    @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+
+    /* Mobile: no sideways scroll, tables become blocks */
+    @media (max-width: 900px){
+      nav a{min-width:auto;flex:1}
+      .info-grid{grid-template-columns:1fr}
+    }
+
+    @media (max-width: 640px){
+      .container{padding:20px 12px}
+      .logo{font-size:24px}
+      .logo .cursor{font-size:14px;top:-3px}
+
+      nav{gap:8px}
+      nav a{padding:12px 10px;font-size:9px}
+
+      .breakdown-table thead{display:none}
+      .breakdown-table, .breakdown-table tbody, .breakdown-table tr{display:block;width:100%}
+      .breakdown-table tr{
+        border:1px solid var(--crt-dim);
+        margin:12px 0;
+        padding:10px;
+        background:rgba(0,0,0,0.20);
+      }
+      .breakdown-table td{
+        display:flex;
+        gap:10px;
+        width:100%;
+        padding:6px 0;
+        border:0;
+        align-items:flex-start;
+      }
+      .breakdown-table td:nth-child(1)::before{content:"TIME"; min-width:70px; color:var(--crt-dim); letter-spacing:1px;}
+      .breakdown-table td:nth-child(2)::before{content:"TYPE"; min-width:70px; color:var(--crt-dim); letter-spacing:1px;}
+      .breakdown-table td:nth-child(3)::before{content:"TITLE"; min-width:70px; color:var(--crt-dim); letter-spacing:1px;}
+      .breakdown-table td:nth-child(4)::before{content:"CREDIT"; min-width:70px; color:var(--crt-dim); letter-spacing:1px;}
+      .breakdown-table td:nth-child(5)::before{content:"CONF"; min-width:70px; color:var(--crt-dim); letter-spacing:1px;}
+    }
+
+    /* Session overlay (login) */
+    #session-overlay{
+      position:fixed;inset:0;
+      background:rgba(0,0,0,0.90);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:10000;
+      padding:20px;
+    }
+    #session-overlay.active{display:flex}
+
+    .session-window{
+      width:min(460px,100%);
+      border:1px solid var(--crt-dim);
+      background:rgba(0,0,0,0.55);
+      box-shadow:0 0 40px rgba(0,255,80,0.12);
+      padding:22px;
+      position:relative;
+    }
+
+    .session-window::before{
+      content:'';
+      position:absolute;inset:0;
+      background:repeating-linear-gradient(
+        0deg,
+        rgba(0,0,0,0.14) 0px,
+        rgba(0,0,0,0.14) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      opacity:0.65;
+      pointer-events:none;
+    }
+
+    .session-title{
+      position:relative;
+      text-align:center;
+      font-size:12px;
+      letter-spacing:3px;
+      text-transform:uppercase;
+      margin-bottom:16px;
+      opacity:0.95;
+      filter: blur(0.35px);
+    }
+
+    .session-row{
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-items:center;
+    }
+
+    .session-row label{
+      font-size:10px;
+      color:var(--crt-dim);
+      letter-spacing:2px;
+      text-transform:uppercase;
+      filter: blur(0.25px);
+    }
+
+    .session-input{
+      width:min(320px,100%);
+      border:1px solid var(--crt-green);
+      background:rgba(0,0,0,0.40);
+      color:var(--crt-green);
+      padding:12px 12px;
+      font-family:var(--mono);
+      font-size:12px;
+      outline:none;
+      text-transform:uppercase;
+      letter-spacing:2px;
+      text-align:center;
+    }
+
+    .session-actions{
+      position:relative;
+      display:flex;
+      justify-content:center;
+      margin-top:16px;
+    }
+
+    .session-actions .btn{
+      width:min(320px,100%);
+      text-align:center;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Session gate (centered, no explainer copy, no session id shown, no anonymous option) -->
+  <div id="session-overlay" aria-hidden="true">
+    <div class="session-window">
+      <div class="session-title">WLSN SIGNAL ARCHIVE TERMINAL</div>
+
+      <div class="session-row">
+        <label for="alias-input">IDENTIFY YOURSELF</label>
+        <input id="alias-input" class="session-input" maxlength="18" autocomplete="off" spellcheck="false" placeholder="YOUR NAME">
+      </div>
+
+      <div class="session-actions">
+        <button id="enter-btn" class="btn" type="button">ENTER</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <header>
+      <div class="logo">WLSN<span class="cursor">█</span></div>
+      <div class="tagline">Western Light and Sound Network</div>
+      <div class="tagline tagline-sub">Signal Archive</div>
+
+      <div id="session-indicator" class="session-panel"></div>
+
+      <nav>
+        <a href="#transmissions" id="nav-transmissions">Broadcast Archive</a>
+        <a href="#info" id="nav-info">Info</a>
+      </nav>
+    </header>
+
+    <main id="app"></main>
+
+    <footer>
+      WLSN ARCHIVE SYSTEM | EST. 1967 | DECLASSIFIED 2025<br>
+      Produced by Brain Crampsmen for WLSN under the ONE Signal distribution mark.
+    </footer>
+  </div>
+
+  <script>
+    const D = {
+      transmissions: [
+        {
+          id:"001",
+          title:"Initial Signal Test",
+          date:"1967-08-12",
+          dateFormatted:"12 AUG 1967",
+          audioUrl:"audio/WLSN - Color Radio from Space - TRANSMISSION 001 - -Initial Signal Test - RECORDED- 12 AUG 1967_2_01.mp3",
+          description:"First recorded transmission. Test pattern followed by musical fragments.",
+          notes:"Recovered from magnetic tape, reel 001-A. Signal degradation minimal.",
+          elements:["e001","e002","e036","e003","e004"]
+        },
+        {
+          id:"002",
+          title:"IT\'S YOU",
+          date:"1967-09-03",
+          dateFormatted:"03 SEP 1967",
+          audioUrl:"audio/transmission_002.mp3",
+          description:"Regular programming. Mix of commercial recordings and field recordings.",
+          notes:"Source uncertain. Aircheck / listening-post capture. Artifact list pending timecodes.",
+          elements:["e2001","e2002","e2003","e2004","e2005","e2006","e2007","e2008","e2009","e2010","e2011","e2012","e2013","e2014","e2015","e2016","e2017","e2018","e2019","e2020","e2021","e2022","e2023","e2024","e2025","e2026","e2027","e2028","e2029","e2030","e2031","e2032","e2033","e2034","e2035","e2036","e2037","e2038","e2039","e2040","e2041","e2042","e2043","e2044","e2045","e2046","e2047","e2048","e2049","e2050","e2051","e2052","e2053","e2054","e2055","e2056","e2057","e2058","e2059","e2060","e2061","e2062","e2063","e2064","e2065","e2066","e2067"],
+        },
+        {
+          id:"003",
+          title:"Late Night Transmission",
+          date:"1968-03-15",
+          dateFormatted:"15 MAR 1968",
+          audioUrl:"",
+          description:"Cut broadcast. Multiple sources spliced together.",
+          notes:"Tape quality excellent. Signal bleed appears intermittently.",
+          elements:["e035","e008","e009","e010","e011","e012","e038","e013","e014","e015","e016","e017","e018","e019","e020","e021","e022","e023","e024","e025","e026","e027","e039","e028","e029","e030","e031","e032","e033","e034"]
+        }
+      ],
+      elements: [
+        {id:"e001",transmission_id:"001",start_time:"00:00",end_time:"00:45",type:"jingle",title:"WLSN Station Identification",primary_credit:"Unknown Announcer",source:"WLSN Internal Recording",year:"1967",notes:"Male voice. Broadcast training evident.",confidence:"high"},
+        {id:"e002",transmission_id:"001",start_time:"00:45",end_time:"04:12",type:"song",title:"Blue in Green",primary_credit:"Miles Davis",source:"Kind of Blue (Columbia, 1959)",year:"1959",notes:"Partial capture. Fades early.",confidence:"high"},
+        {id:"e003",transmission_id:"001",start_time:"04:12",end_time:"04:30",type:"unknown",title:"Unidentified Voice Fragment",primary_credit:"Unknown",source:"Unknown",year:null,notes:"Female voice. Possible adjacent-channel crosstalk.",confidence:"low"},
+        {id:"e004",transmission_id:"001",start_time:"04:30",end_time:"05:00",type:"technical",title:"1kHz Reference Tone",primary_credit:"WLSN Technical",source:"Calibration Reference",year:"1967",notes:"Frequency reference signal.",confidence:"high"},
+        {id:"e036",transmission_id:"001",start_time:"02:18",end_time:"02:22",type:"unknown",title:"Carrier Wave Interference",primary_credit:"Unknown",source:"Unknown",year:null,notes:"Brief heterodyne whistle. Frequency bleed.",confidence:"low"},
+
+                {id:"e2001",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"sfx",title:"RAYS",primary_credit:"Unknown",source:"Unknown",year:null,logged_by:"tape_hound",notes:"",confidence:"low"},
+        {id:"e2002",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"IT CAME FROM OUTER SPACE (score cue)",primary_credit:"Irving Gertz / Herman Stein",source:"It Came from Outer Space (Universal, 1953)",year:"1953",logged_by:"vinyl_archive",notes:"Film score cue; exact cue name depends on source rip.",confidence:"medium"},
+        {id:"e2003",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",source:"Receiver scan / broadcast tuning SFX",year:null,logged_by:"reel_to_reel",notes:"",confidence:"medium"},
+        {id:"e2004",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"jingle",title:"WHBQ (station ID)",primary_credit:"WHBQ (Memphis)",source:"Station identification jingle",year:null,logged_by:"djmoondust",notes:"",confidence:"medium"},
+        {id:"e2005",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"WOLFMAN JACK (American Graffiti)",primary_credit:"Wolfman Jack",source:"American Graffiti (1973) radio sequence",year:"1973",logged_by:"signal_lost",notes:"",confidence:"medium"},
+        {id:"e2006",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"ROBINSON CRUSOE ON MARS (excerpt)",primary_credit:"Robinson Crusoe on Mars (Filmways)",source:"Film excerpt; Adam West appears in cast",year:"1964",logged_by:"signal_lost",notes:"",confidence:"medium"},
+        {id:"e2007",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"commercial",title:"PILLSBURY COOKIES (Something from the oven)",primary_credit:"Pillsbury",source:"Campaign: Nothin' says lovin' like somethin' from the oven / Pillsbury says it best",year:null,logged_by:"djmoondust",notes:"",confidence:"high"},
+        {id:"e2008",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"commercial",title:"CAMEL CIGARETTES (Have a real cigarette)",primary_credit:"Camel (R.J. Reynolds)",source:"Campaign: Have a real cigarette",year:null,logged_by:"djmoondust",notes:"",confidence:"high"},
+        {id:"e2009",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"jingle",title:"MUSIC TIME (jingle)",primary_credit:"Unknown",source:"Source unknown",year:null,logged_by:"tape_hound",notes:"",confidence:"low"},
+        {id:"e2010",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"IT’S YOU",primary_credit:"The Millennium",source:"Columbia era (exact release TBD)",year:"1968",logged_by:"vinyl_archive",notes:"",confidence:"medium"},
+        {id:"e2011",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"YOU ARE LISTENING TO COLOR RADIO FROM SPACE",primary_credit:"WLSN / Brain Crampsmen",source:"Original narration",year:"2026",logged_by:"reel_to_reel",notes:"",confidence:"high"},
+        {id:"e2012",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"ROD SERLING (pitch/promo excerpt)",primary_credit:"Rod Serling",source:"Twilight Zone related pitch/promo (exact source TBD)",year:null,logged_by:"signal_lost",notes:"Needs exact clip source to date precisely.",confidence:"low"},
+        {id:"e2013",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"sfx",title:"MAGIC SPELL",primary_credit:"Unknown",source:"SFX library",year:null,logged_by:"tape_hound",notes:"",confidence:"low"},
+        {id:"e2014",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",source:"Receiver scan / broadcast tuning SFX",year:null,logged_by:"reel_to_reel",notes:"",confidence:"medium"},
+        {id:"e2015",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"RADIO SIGNAL BEEPING",primary_credit:"Unknown",source:"Technical signal beeps (unverified)",year:null,logged_by:"reel_to_reel",notes:"",confidence:"low"},
+        {id:"e2016",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"commercial",title:"COKE WEIGHT LOSS (diet product ad)",primary_credit:"Unknown",source:"Commercial clip (exact product TBD)",year:null,logged_by:"djmoondust",notes:"Needs product name to verify year.",confidence:"low"},
+        {id:"e2017",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"2002 – A HIT SONG",primary_credit:"The Free Design",source:"Project 3 era",year:"1969",logged_by:"vinyl_archive",notes:"",confidence:"high"},
+        {id:"e2018",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",source:"Receiver scan / broadcast tuning SFX",year:null,logged_by:"reel_to_reel",notes:"",confidence:"medium"},
+        {id:"e2019",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"commercial",title:"SUGAR CRISP (Granny Goodwitch)",primary_credit:"Post",source:"Agency: Benton & Bowles (DMB&B)",year:null,logged_by:"djmoondust",notes:"",confidence:"high"},
+        {id:"e2020",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"jingle",title:"93 KHJ MORE MUSIC (station ID)",primary_credit:"93 KHJ (Los Angeles)",source:"Station jingle/ID",year:null,logged_by:"djmoondust",notes:"",confidence:"medium"},
+        {id:"e2021",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"IT’S MY PARTY (T.A.M.I. Show)",primary_credit:"Lesley Gore",source:"The T.A.M.I. Show performance clip",year:"1964",logged_by:"vinyl_archive",notes:"",confidence:"medium"},
+        {id:"e2022",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"jingle",title:"MUSICRADIO WLS (ID)",primary_credit:"WLS (Chicago)",source:"Station ID package (PAMS / singers; exact cut TBD)",year:null,logged_by:"djmoondust",notes:"Exact package/cut TBD.",confidence:"low"},
+        {id:"e2023",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"DOUBLE YELLOW LINE",primary_credit:"The Music Machine",source:"Single/album era (exact release TBD)",year:"1967",logged_by:"vinyl_archive",notes:"Confirm exact release metadata later.",confidence:"medium"},
+        {id:"e2024",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"TOMORROW",primary_credit:"Strawberry Alarm Clock",source:"Uni era",year:"1967",logged_by:"vinyl_archive",notes:"",confidence:"high"},
+        {id:"e2025",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",source:"Receiver scan / broadcast tuning SFX",year:null,logged_by:"reel_to_reel",notes:"",confidence:"medium"},
+        {id:"e2026",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"BATMAN IN COLOR (Hi Diddle Riddle)",primary_credit:"Batman (TV series)",source:"Episode Hi Diddle Riddle",year:"1966",logged_by:"signal_lost",notes:"",confidence:"high"},
+        {id:"e2027",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"SCOOBY-DOO (theme)",primary_credit:"Hoyt Curtin",source:"Scooby-Doo, Where Are You!",year:"1969",logged_by:"vinyl_archive",notes:"",confidence:"high"},
+        {id:"e2028",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"THE PROPER ORNAMENTS",primary_credit:"Carpenters Union",source:"Recording (exact release TBD)",year:null,logged_by:"vinyl_archive",notes:"",confidence:"low"},
+        {id:"e2029",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"NIGHTMARE (narration)",primary_credit:"Unknown",source:"Source TBD",year:null,logged_by:"signal_lost",notes:"",confidence:"low"},
+        {id:"e2030",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"sfx",title:"SAMANTHA’S NOSE TWITCH",primary_credit:"Bewitched (TV)",source:"Series SFX",year:"1964",logged_by:"tape_hound",notes:"",confidence:"medium"},
+        {id:"e2031",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"sfx",title:"AUDIENCE LAUGHTER",primary_credit:"Bewitched (TV)",source:"Laugh track / audience bed (source TBD)",year:"1964",logged_by:"tape_hound",notes:"",confidence:"low"},
+        {id:"e2032",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"jingle",title:"MUSICRADIO WLS (multiple idents)",primary_credit:"WLS (Chicago)",source:"Multiple ident recordings (package TBD)",year:null,logged_by:"djmoondust",notes:"",confidence:"low"},
+        {id:"e2033",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"sfx",title:"RAYS",primary_credit:"Unknown",source:"Unknown",year:null,logged_by:"tape_hound",notes:"",confidence:"low"},
+        {id:"e2034",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"DOUBLE YELLOW LINE (repeat)",primary_credit:"The Music Machine",source:"Repeat",year:"1967",logged_by:"vinyl_archive",notes:"",confidence:"medium"},
+        {id:"e2035",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",source:"Receiver scan / broadcast tuning SFX",year:null,logged_by:"reel_to_reel",notes:"",confidence:"medium"},
+        {id:"e2036",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"SHE LOVES YOU",primary_credit:"The Beatles",source:"Single",year:"1963",logged_by:"vinyl_archive",notes:"",confidence:"high"},
+        {id:"e2037",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"jingle",title:"93 KHJ (station ID)",primary_credit:"93 KHJ (Los Angeles)",source:"Station jingle/ID",year:null,logged_by:"djmoondust",notes:"",confidence:"medium"},
+        {id:"e2038",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",source:"Receiver scan / broadcast tuning SFX",year:null,logged_by:"reel_to_reel",notes:"",confidence:"medium"},
+        {id:"e2039",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"GOD ONLY KNOWS",primary_credit:"The Beach Boys",source:"Pet Sounds",year:"1966",logged_by:"vinyl_archive",notes:"Brian Wilson / Tony Asher",confidence:"high"},
+        {id:"e2040",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"IT CAME FROM OUTER SPACE (score cue, repeat)",primary_credit:"Irving Gertz / Herman Stein",source:"It Came from Outer Space (Universal, 1953)",year:"1953",logged_by:"vinyl_archive",notes:"",confidence:"medium"},
+        {id:"e2041",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"ROBINSON CRUSOE ON MARS (excerpt, repeat)",primary_credit:"Robinson Crusoe on Mars (Filmways)",source:"Film excerpt; Adam West appears in cast",year:"1964",logged_by:"signal_lost",notes:"",confidence:"medium"},
+        {id:"e2042",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",source:"Receiver scan / broadcast tuning SFX",year:null,logged_by:"reel_to_reel",notes:"",confidence:"medium"},
+        {id:"e2043",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"BEACH BOYS TV SPECIAL (Surf’s Up excerpt)",primary_credit:"The Beach Boys",source:"TV special excerpt (exact special TBD)",year:null,logged_by:"signal_lost",notes:"Verify exact special/title later.",confidence:"low"},
+        {id:"e2044",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"sfx",title:"MAGIC SPELL",primary_credit:"Unknown",source:"SFX library",year:null,logged_by:"tape_hound",notes:"",confidence:"low"},
+        {id:"e2045",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"UNDERDOG",primary_credit:"Sly & The Family Stone",source:"Epic era",year:"1967",logged_by:"vinyl_archive",notes:"",confidence:"high"},
+        {id:"e2046",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"sfx",title:"RAYS",primary_credit:"Unknown",source:"Unknown",year:null,logged_by:"tape_hound",notes:"",confidence:"low"},
+        {id:"e2047",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"SCOOBY-DOO UNDERSCORE",primary_credit:"Hoyt Curtin (likely)",source:"Scooby-Doo underscore (verify)",year:null,logged_by:"vinyl_archive",notes:"Confirm source of underscore.",confidence:"low"},
+        {id:"e2048",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"jingle",title:"MUSICRADIO WLS (ID, repeat)",primary_credit:"WLS (Chicago)",source:"Station ID package (TBD)",year:null,logged_by:"djmoondust",notes:"",confidence:"low"},
+        {id:"e2049",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",source:"Receiver scan / broadcast tuning SFX",year:null,logged_by:"reel_to_reel",notes:"",confidence:"medium"},
+        {id:"e2050",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"ROBINSON CRUSOE ON MARS (excerpt, repeat)",primary_credit:"Robinson Crusoe on Mars (Filmways)",source:"Film excerpt; Adam West appears in cast",year:"1964",logged_by:"signal_lost",notes:"",confidence:"medium"},
+        {id:"e2051",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"sfx",title:"MAGIC SPELL",primary_credit:"Unknown",source:"SFX library",year:null,logged_by:"tape_hound",notes:"",confidence:"low"},
+        {id:"e2052",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"IT SEEMS TO ME",primary_credit:"The Gestures",source:"Soma era",year:"1964",logged_by:"vinyl_archive",notes:"",confidence:"high"},
+        {id:"e2053",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",source:"Receiver scan / broadcast tuning SFX",year:null,logged_by:"reel_to_reel",notes:"",confidence:"medium"},
+        {id:"e2054",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"commercial",title:"KOOL-AID KIDS (Australia)",primary_credit:"Kool-Aid (General Foods)",source:"Commercial clip (verify year)",year:"1960",logged_by:"djmoondust",notes:"Verify exact spot and year.",confidence:"low"},
+        {id:"e2055",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"RUN RUN RUN",primary_credit:"The Gestures",source:"Soma",year:"1964",logged_by:"vinyl_archive",notes:"",confidence:"high"},
+        {id:"e2056",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",source:"Receiver scan / broadcast tuning SFX",year:null,logged_by:"reel_to_reel",notes:"",confidence:"medium"},
+        {id:"e2057",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"ROBINSON CRUSOE ON MARS (excerpt, repeat)",primary_credit:"Robinson Crusoe on Mars (Filmways)",source:"Film excerpt; Adam West appears in cast",year:"1964",logged_by:"signal_lost",notes:"",confidence:"medium"},
+        {id:"e2058",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"WEATHER REPORT (93 KHJ)",primary_credit:"93 KHJ (Los Angeles)",source:"Aircheck fragment",year:null,logged_by:"signal_lost",notes:"",confidence:"low"},
+        {id:"e2059",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"IN MY LONELY ROOM",primary_credit:"Martha Reeves & The Vandellas",source:"Motown",year:"1964",logged_by:"vinyl_archive",notes:"",confidence:"high"},
+        {id:"e2060",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"BATMAN IN COLOR (music tag)",primary_credit:"Batman (TV series)",source:"Theme/tag (verify exact)",year:null,logged_by:"vinyl_archive",notes:"",confidence:"low"},
+        {id:"e2061",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"sfx",title:"SCREAM (Nightmare short film)",primary_credit:"Unknown",source:"Unknown",year:null,logged_by:"tape_hound",notes:"",confidence:"low"},
+        {id:"e2062",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"song",title:"TOMORROW (repeat)",primary_credit:"Strawberry Alarm Clock",source:"Repeat",year:"1967",logged_by:"vinyl_archive",notes:"",confidence:"high"},
+        {id:"e2063",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"COLOR RADIO FROM SPACE (credits)",primary_credit:"WLSN / Brain Crampsmen",source:"Original credits VO",year:"2026",logged_by:"reel_to_reel",notes:"",confidence:"high"},
+        {id:"e2064",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"SHORTWAVE HAMRADIO RECEIVER",primary_credit:"Unknown",source:"Shortwave receiver audio",year:null,logged_by:"reel_to_reel",notes:"",confidence:"medium"},
+        {id:"e2065",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"narration",title:"THIS HAS BEEN A FILMWAYS PRESENTATION",primary_credit:"Filmways (tag)",source:"End tag (voice credited by you as Zsa Zsa Gabor)",year:null,logged_by:"signal_lost",notes:"Verify exact end tag version later.",confidence:"medium"},
+        {id:"e2066",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"jingle",title:"MUSICRADIO WLS (ONE tag)",primary_credit:"WLS (Chicago)",source:"PAMS style package (TBD)",year:null,logged_by:"djmoondust",notes:"",confidence:"low"},
+        {id:"e2067",transmission_id:"002",start_time:"--:--",end_time:"--:--",type:"technical",title:"SHORTWAVE HAMRADIO RECEIVER (repeat)",primary_credit:"Unknown",source:"Shortwave receiver audio",year:null,logged_by:"reel_to_reel",notes:"",confidence:"medium"},
+{id:"e008",transmission_id:"003",start_time:"00:00",end_time:"00:15",type:"jingle",title:"Weather Tag",primary_credit:"Los Angeles Station",source:"Broadcast Capture",year:"1968",notes:"Station tag fragment.",confidence:"high"},
+        {id:"e009",transmission_id:"003",start_time:"00:15",end_time:"00:45",type:"commercial",title:"Cereal Spot",primary_credit:"Unknown",source:"Broadcast Capture",year:"1968",notes:"Cut version possible.",confidence:"high"},
+        {id:"e010",transmission_id:"003",start_time:"00:45",end_time:"03:30",type:"song",title:"Look Through My Window",primary_credit:"The Mamas & The Papas",source:"Deliver (Dunhill, 1967)",year:"1967",notes:"Album track.",confidence:"high"},
+        {id:"e011",transmission_id:"003",start_time:"03:30",end_time:"06:15",type:"song",title:"The Dance at the Gym",primary_credit:"West Side Story Cast",source:"Soundtrack (Columbia, 1961)",year:"1961",notes:"Mambo/Blues segment.",confidence:"high"},
+        {id:"e012",transmission_id:"003",start_time:"06:15",end_time:"08:30",type:"song",title:"Pray for Surf",primary_credit:"The Honeys",source:"Capitol (1963)",year:"1963",notes:"Studio production.",confidence:"high"},
+        {id:"e013",transmission_id:"003",start_time:"08:30",end_time:"10:45",type:"song",title:"Easy as 1-2-3",primary_credit:"Jan & Dean",source:"Liberty (1966)",year:"1966",notes:"Rare album track.",confidence:"medium"},
+        {id:"e014",transmission_id:"003",start_time:"10:45",end_time:"12:50",type:"song",title:"Run Run Run",primary_credit:"The Gestures",source:"Soma (1964)",year:"1964",notes:"Regional hit.",confidence:"high"},
+        {id:"e015",transmission_id:"003",start_time:"12:50",end_time:"15:20",type:"song",title:"Underdog",primary_credit:"Sly & The Family Stone",source:"Epic (1967)",year:"1967",notes:"Deep cut.",confidence:"high"},
+        {id:"e016",transmission_id:"003",start_time:"15:20",end_time:"18:00",type:"song",title:"Sarah Saturday",primary_credit:"Lazy Smoke",source:"Onyx (1968)",year:"1968",notes:"Rare pressing.",confidence:"medium"},
+        {id:"e017",transmission_id:"003",start_time:"18:00",end_time:"20:30",type:"song",title:"Tomorrow",primary_credit:"Strawberry Alarm Clock",source:"Uni (1967)",year:"1967",notes:"Album track.",confidence:"high"},
+        {id:"e018",transmission_id:"003",start_time:"20:30",end_time:"22:45",type:"song",title:"Mama Says",primary_credit:"The Beach Boys",source:"Friends (1968)",year:"1968",notes:"Album fragment.",confidence:"high"},
+        {id:"e019",transmission_id:"003",start_time:"22:45",end_time:"25:00",type:"song",title:"Going Out of My Head",primary_credit:"The Zombies",source:"1968",year:"1968",notes:"Alternate cut possible.",confidence:"high"},
+        {id:"e020",transmission_id:"003",start_time:"25:00",end_time:"27:15",type:"song",title:"Please No More Sad Songs",primary_credit:"The Idle Race",source:"1968",year:"1968",notes:"Pre-ELO credit.",confidence:"high"},
+        {id:"e021",transmission_id:"003",start_time:"27:15",end_time:"30:00",type:"song",title:"Compared to What",primary_credit:"Les McCann",source:"1969",year:"1969",notes:"Live capture.",confidence:"high"},
+        {id:"e022",transmission_id:"003",start_time:"30:00",end_time:"31:00",type:"song",title:"Lost in Space Theme",primary_credit:"TV Theme",source:"CBS (1965)",year:"1965",notes:"Opening title.",confidence:"high"},
+        {id:"e023",transmission_id:"003",start_time:"31:00",end_time:"33:30",type:"song",title:"In My Lonely Room",primary_credit:"Martha Reeves & The Vandellas",source:"1965",year:"1965",notes:"Motown cut.",confidence:"high"},
+        {id:"e024",transmission_id:"003",start_time:"33:30",end_time:"34:30",type:"spoken",title:"TV Clip",primary_credit:"Unknown",source:"Broadcast Fragment",year:"1964",notes:"Dialog excerpt.",confidence:"medium"},
+        {id:"e025",transmission_id:"003",start_time:"34:30",end_time:"35:00",type:"sound",title:"Audience Cheering",primary_credit:"Unknown",source:"Concert Film",year:"1964",notes:"Crowd wash.",confidence:"high"},
+        {id:"e026",transmission_id:"003",start_time:"35:00",end_time:"37:30",type:"song",title:"Live Performance Excerpt",primary_credit:"Unknown",source:"Concert Film",year:"1964",notes:"Short excerpt.",confidence:"high"},
+        {id:"e027",transmission_id:"003",start_time:"37:30",end_time:"39:00",type:"song",title:"Unverified Demo",primary_credit:"Unknown",source:"Bootleg Circulation",year:"1967",notes:"Unconfirmed source.",confidence:"low"},
+        {id:"e028",transmission_id:"003",start_time:"39:00",end_time:"41:15",type:"song",title:"2002 A Hit Song",primary_credit:"The Free Design",source:"1969",year:"1969",notes:"Baroque pop arrangement.",confidence:"high"},
+        {id:"e029",transmission_id:"003",start_time:"41:15",end_time:"43:30",type:"song",title:"Double Yellow Line",primary_credit:"The Music Machine",source:"1967",year:"1967",notes:"Single cut.",confidence:"high"},
+        {id:"e030",transmission_id:"003",start_time:"43:30",end_time:"45:45",type:"song",title:"She Loves You",primary_credit:"The Beatles",source:"1963",year:"1963",notes:"Single.",confidence:"high"},
+        {id:"e031",transmission_id:"003",start_time:"45:45",end_time:"48:30",type:"song",title:"God Only Knows",primary_credit:"The Beach Boys",source:"1966",year:"1966",notes:"Album track.",confidence:"high"},
+        {id:"e032",transmission_id:"003",start_time:"48:30",end_time:"49:30",type:"spoken",title:"Film Narration",primary_credit:"Unknown",source:"Film Fragment",year:"1953",notes:"Narration excerpt.",confidence:"medium"},
+        {id:"e033",transmission_id:"003",start_time:"49:30",end_time:"50:30",type:"spoken",title:"Film Dialog",primary_credit:"Unknown",source:"Film Fragment",year:"1964",notes:"Dialog excerpt.",confidence:"medium"},
+        {id:"e034",transmission_id:"003",start_time:"50:30",end_time:"54:00",type:"song",title:"Solo Piano Performance",primary_credit:"Unknown",source:"TV Special",year:"1967",notes:"Short performance.",confidence:"high"},
+        {id:"e035",transmission_id:"003",start_time:"00:08",end_time:"00:23",type:"jingle",title:"Radio Sting",primary_credit:"Station Singers",source:"Station Kit",year:"1967",notes:"Identification sting.",confidence:"high"},
+        {id:"e038",transmission_id:"003",start_time:"12:08",end_time:"12:15",type:"unknown",title:"Morse Pattern",primary_credit:"Unknown",source:"Unknown",year:null,notes:"Rhythmic beeping. Interference.",confidence:"low"},
+        {id:"e039",transmission_id:"003",start_time:"28:45",end_time:"28:52",type:"unknown",title:"Distorted Music Fragment",primary_credit:"Unknown",source:"Unknown",year:null,notes:"Heavily degraded. Unconfirmed.",confidence:"low"}
+      ]
+    };
+
+    class App {
+      constructor(){
+        this.data = D;
+        this.chatMessages = [];
+        this.chatScrollPos = 0;
+        this._sessionTimer = null;
+        this._slideshowTimer = null;
+        this.chatInterval = null;
+
+        this.chatBots = [
+          {name:'djmoondust',location:'Portland, OR'},
+          {name:'tape_hound',location:'London, UK'},
+          {name:'freq_drift',location:'Tokyo, JP'},
+          {name:'vinyl_archive',location:'Melbourne, AU'},
+          {name:'signal_lost',location:'Brooklyn, NY'},
+          {name:'reel_to_reel',location:'Berlin, DE'}
+        ];
+
+        this.botMessages = [
+          {bot:1,text:"001: anyone else catch the dip right after the ident? feels like the deck grabbed.",reply:true},
+          {bot:3,text:"003 opens with a clean weather tag, but the noise floor feels off for an aircheck."},
+          {bot:0,text:"The WLSN ident shows up more than once, but never the same length twice."},
+          {bot:4,text:"02:18 in 001: that whistle again. quiet, same band.",reply:true},
+          {bot:2,text:"I tried matching the cereal spot in 003. close, not exact. maybe a different cut?"},
+          {bot:5,text:"Hard splice at 03:22 on 002, then it returns brighter. two passes?",reply:true},
+          {bot:1,text:"If it was rebroadcast, why keep the bleed? feels like the bleed is the point."},
+          {bot:3,text:"Tape box handwriting switches formats mid-run. month/day once, then day.month."},
+          {bot:0,text:"The ident consonants smear like it was played off a speaker into a mic.",reply:true},
+          {bot:4,text:"Some tracks run a hair fast. could be speed drift, could be source.",reply:true},
+          {bot:2,text:"Anyone recognize the four note chime? feels like a station kit."},
+          {bot:5,text:"I keep hearing room tone under the music. like another space underneath.",reply:true},
+          {bot:1,text:"003: the word 'network' pops once, then disappears. too clean to be accidental."},
+          {bot:3,text:"That word sits on top of the hiss, not inside it."},
+          {bot:0,text:"Reminder: tag artifacts separately from tracks. this is not a playlist.",reply:true},
+          {bot:4,text:"
