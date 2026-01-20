@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WLSN | Western Light and Sound Network</title>
+<style>
+:root{
+  --bg:#0b0e0b;
+  --green:#2ad01f;
+  --green-d:#104a0c;
+  --muted:#3d8b3a;
+  --soft:#9bff8e;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--green);font-family:Courier New, monospace}
+a{color:var(--green);text-decoration:none}
+a:hover{box-shadow:0 0 10px rgba(42,208,31,.35)}
+header{border-bottom:1px solid var(--green);padding:24px}
+.brand{font-size:36px;letter-spacing:6px}
+.sub{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4}
+nav{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap}
+nav a{
+  display:inline-block;
+  border:1px solid var(--green);
+  padding:10px 18px;
+  border-radius:2px;
+}
+nav a.active{
+  background:rgba(42,208,31,.12);
+  box-shadow:0 0 12px rgba(42,208,31,.65);
+}
+main{padding:24px;max-width:1200px;margin:0 auto}
+.panel{
+  border:1px solid var(--green);
+  padding:16px;
+  margin-bottom:24px;
+}
+h2{margin:0 0 12px 0;font-size:14px;letter-spacing:2px}
+p{margin:0 0 12px 0;color:var(--soft);font-size:12px;line-height:1.5}
+.meta{color:var(--muted);font-size:11px}
+.audio-bar{display:flex;align-items:center;gap:12px}
+audio{width:100%}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{border:1px solid var(--green);padding:8px;text-align:left;vertical-align:top}
+th{color:var(--soft)}
+.type-tag{border:1px solid var(--green);padding:2px 6px;font-size:10px;display:inline-block}
+.badge{border:1px solid var(--green);padding:2px 6px;font-size:10px;display:inline-block;color:var(--soft)}
+.footer{border-top:1px solid var(--green);padding:16px;text-align:center;font-size:10px;color:var(--muted)}
+hr{border:0;border-top:1px solid rgba(42,208,31,.35);margin:14px 0}
+.hidden{display:none}
+.small{font-size:11px;color:var(--muted)}
+.code{font-family:Courier New, monospace}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">WLSN█</div>
+  <div class="sub">WESTERN LIGHT AND SOUND NETWORK<br>SIGNAL ARCHIVE</div>
+  <nav>
+    <a href="#/archive" id="nav-archive">BROADCAST ARCHIVE</a>
+    <a href="#/transmissions" id="nav-transmissions">TRANSMISSIONS</a>
+    <a href="#/info" id="nav-info">INFO</a>
+  </nav>
+</header>
+
+<main id="app"></main>
+
+<div class="footer">
+WLSN ARCHIVE SYSTEM | EST. 1967 | DECLASSIFIED 2025<br>
+Produced by Brain Crampsmen for WLSN under the ONE Signal distribution mark.
+</div>
+
+<script>
+/* -----------------------------
+   Data (edit safely in one spot)
+-------------------------------- */
+const transmissions = [
+  {
+    id: "002",
+    title: "Transmission 002",
+    date: "RECOVERED: 2026-01-20",
+    audioSrc: "audio/transmission_002.mp3",
+    // Replace this array with the full artifact list from your other chat.
+    // Keep the keys exactly as shown: time, type, title, source, year, notes (optional)
+    artifacts: [
+      { time: "", type: "SFX", title: "Rays", source: "Radio FX Library", year: "1960s" },
+      { time: "", type: "MUSIC", title: "It Came from Outer Space", source: "Herman Stein", year: "1953" },
+      { time: "", type: "JINGLE", title: "WHBQ Ident", source: "WHBQ Memphis", year: "1960s" },
+      { time: "", type: "NARRATION", title: "Robinson Crusoe on Mars", source: "Adam West", year: "1964" },
+      { time: "", type: "COMMERCIAL", title: "Pillsbury Cookies", source: "Benton & Bowles", year: "1960s" },
+      { time: "", type: "COMMERCIAL", title: "Camel Cigarettes", source: "R.J. Reynolds", year: "1960s" },
+      { time: "", type: "SONG", title: "It's You", source: "The Millennium", year: "1968" },
+      { time: "", type: "SONG", title: "2002 - A Hit Song", source: "The Free Design", year: "1967" },
+      { time: "", type: "SONG", title: "It's My Party", source: "Lesley Gore", year: "1963" },
+      { time: "", type: "SONG", title: "God Only Knows", source: "The Beach Boys", year: "1966" },
+      { time: "", type: "SONG", title: "In My Lonely Room", source: "Martha Reeves & The Vandellas", year: "1964" }
+    ]
+  }
+];
+
+// Optional: if you want to inject artifacts from another script, set window.WLSN_ARTIFACTS_002 = [...] before this runs.
+(function hydrateFromWindow(){
+  try{
+    if (window.WLSN_ARTIFACTS_002 && Array.isArray(window.WLSN_ARTIFACTS_002)) {
+      const t = transmissions.find(x => x.id === "002");
+      if (t) t.artifacts = window.WLSN_ARTIFACTS_002;
+    }
+  }catch(e){}
+})();
+
+/* -----------------------------
+   Helpers
+-------------------------------- */
+const app = document.getElementById('app');
+const navArchive = document.getElementById('nav-archive');
+const navTransmissions = document.getElementById('nav-transmissions');
+const navInfo = document.getElementById('nav-info');
+
+function escapeHtml(str){
+  return String(str ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function setActive(hash){
+  navArchive.classList.toggle('active', hash.startsWith('#/archive'));
+  navTransmissions.classList.toggle('active', hash.startsWith('#/transmissions'));
+  navInfo.classList.toggle('active', hash.startsWith('#/info'));
+}
+
+function renderError(title, err){
+  const msg = (err && (err.stack || err.message)) ? (err.stack || err.message) : String(err ?? "Unknown error");
+  app.innerHTML = `
+    <div class="panel">
+      <h2>RENDER ERROR</h2>
+      <p><span class="badge">FAIL</span> ${escapeHtml(title)}</p>
+      <hr>
+      <p class="small code">${escapeHtml(msg)}</p>
+      <p class="small">If this appears, the page did not fully crash, it trapped the error so you can still navigate.</p>
+    </div>
+  `;
+}
+
+function renderArtifactsTable(artifacts){
+  if (!artifacts || !artifacts.length){
+    return `<p class="small">No artifacts linked yet.</p>`;
+  }
+
+  const rows = artifacts.map(a => `
+    <tr>
+      <td>${escapeHtml(a.time || "")}</td>
+      <td><span class="type-tag">${escapeHtml(a.type || "")}</span></td>
+      <td>${escapeHtml(a.title || "")}</td>
+      <td>${escapeHtml(a.source || "")}</td>
+      <td>${escapeHtml(a.year || "")}</td>
+    </tr>
+  `).join("");
+
+  return `
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>TIME</th>
+            <th>TYPE</th>
+            <th>TITLE</th>
+            <th>ARTIST / SOURCE</th>
+            <th>YEAR</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+/* -----------------------------
+   Views
+-------------------------------- */
+function renderArchive(){
+  const latest = transmissions[transmissions.length - 1];
+  const latestLink = latest ? `#/transmissions/${latest.id}` : "#/transmissions";
+
+  app.innerHTML = `
+    <div class="panel">
+      <h2>LATEST TRANSMISSION</h2>
+      <p class="meta">${latest ? escapeHtml(latest.date || "") : ""}</p>
+      <a href="${latestLink}">${latest ? escapeHtml(latest.title) : "No transmissions yet"}</a>
+    </div>
+
+    <div class="panel">
+      <h2>TRANSMISSIONS</h2>
+      ${transmissions.map(t => `<div><a href="#/transmissions/${escapeHtml(t.id)}">${escapeHtml(t.id)}</a> <span class="small">${escapeHtml(t.title)}</span></div>`).join("")}
+    </div>
+  `;
+}
+
+function renderTransmissions(){
+  app.innerHTML = `
+    <div class="panel">
+      <h2>TRANSMISSIONS</h2>
+      ${transmissions.map(t => `
+        <div style="margin-bottom:10px">
+          <a href="#/transmissions/${escapeHtml(t.id)}">${escapeHtml(t.id)} | ${escapeHtml(t.title)}</a>
+          <div class="small">${escapeHtml(t.date || "")}</div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderInfo(){
+  app.innerHTML = `
+    <div class="panel">
+      <h2>INFO</h2>
+      <p>Recovered discussion, archive images, and update channels for newly linked transmissions.</p>
+      <p class="small">If something looks missing, open DevTools Console and check for a red error line. This file traps most errors and shows them on page.</p>
+    </div>
+  `;
+}
+
+function renderTransmission(id){
+  const t = transmissions.find(x => x.id === id);
+  if (!t){
+    app.innerHTML = `
+      <div class="panel">
+        <h2>NOT FOUND</h2>
+        <p>Transmission ${escapeHtml(id)} not in index.</p>
+        <a href="#/transmissions">Back to transmissions</a>
+      </div>
+    `;
+    return;
+  }
+
+  app.innerHTML = `
+    <div class="panel">
+      <h2>${escapeHtml(t.title).toUpperCase()}</h2>
+      <p class="meta">${escapeHtml(t.date || "")}</p>
+      <div class="audio-bar">
+        <audio controls preload="none" src="${escapeHtml(t.audioSrc)}"></audio>
+      </div>
+      <p class="small" style="margin-top:10px">Audio path: <span class="code">${escapeHtml(t.audioSrc)}</span></p>
+    </div>
+
+    <div class="panel">
+      <h2>ARTIFACTS</h2>
+      ${renderArtifactsTable(t.artifacts)}
+      <hr>
+      <p class="small">To replace the artifacts: edit <span class="code">transmissions[0].artifacts</span> near the top of this file, or set <span class="code">window.WLSN_ARTIFACTS_002</span> before this script runs.</p>
+    </div>
+  `;
+}
+
+/* -----------------------------
+   Router
+-------------------------------- */
+function router(){
+  const hash = location.hash || '#/archive';
+  setActive(hash);
+
+  try{
+    if (hash === '#/archive') renderArchive();
+    else if (hash === '#/transmissions') renderTransmissions();
+    else if (hash === '#/info') renderInfo();
+    else if (hash.startsWith('#/transmissions/')) {
+      const id = hash.split('/')[2] || '';
+      renderTransmission(id);
+    } else {
+      renderArchive();
+    }
+  } catch (err){
+    renderError("Router failed on " + hash, err);
+  }
+}
+
+window.addEventListener('hashchange', router);
+router();
+</script>
+</body>
+</html>
