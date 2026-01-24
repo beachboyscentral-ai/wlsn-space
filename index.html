@@ -1,0 +1,1882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WLSN | Western Light and Sound Network</title>
+
+  <!-- Favicons (keep these files in your site root) -->
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+  <!-- Optional (later): RSS feed for podcatchers -->
+  <!-- <link rel="alternate" type="application/rss+xml" title="WLSN Broadcast Archive" href="feed.xml"> -->
+
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --crt-green:#28d428;
+      --crt-dim:#0d5a0d;
+      --crt-bg:#0b110b;
+      --crt-glow:rgba(40,212,40,0.55);
+      --mono:'Courier New',monospace;
+    }
+
+    body{
+      font-family:var(--mono);
+      background:var(--crt-bg);
+      color:var(--crt-green);
+      line-height:1.6;
+      font-size:13px;
+      text-shadow:0 0 3px var(--crt-glow);
+    }
+
+    body::before{
+      content:'';
+      position:fixed;top:0;left:0;width:100%;height:100%;
+      background:repeating-linear-gradient(
+        0deg,
+        rgba(0,0,0,0.12) 0px,
+        rgba(0,0,0,0.12) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      pointer-events:none;
+      z-index:9999;
+      opacity:0.88;
+    }
+
+    .container{max-width:1000px;margin:0 auto;padding:40px 20px}
+
+    header{
+      border-top:2px solid var(--crt-green);
+      border-bottom:2px solid var(--crt-green);
+      padding:20px 0;
+      margin-bottom:28px;
+    }
+
+    .logo{
+      font-size:36px;
+      font-weight:700;
+      letter-spacing:12px;
+      margin-bottom:10px;
+      text-shadow:0 0 8px var(--crt-glow);
+      line-height:1.1;
+    }
+
+    /* Cursor sizing and alignment */
+    .logo .cursor{
+      font-size:22px;
+      line-height:1;
+      display:inline-block;
+      vertical-align:baseline;
+      margin-left:8px;
+      animation:blink 1.6s infinite;
+      position:relative;
+      top:-5px;
+      opacity:0.95;
+    }
+
+    .tagline{
+      font-size:11px;
+      letter-spacing:2px;
+      color:#4a9a4a;
+      text-transform:uppercase;
+      opacity:0.75;
+    }
+
+    /* Make "Signal Archive" slightly blurrier */
+    .tagline-sub{
+      margin-top:2px;
+      opacity:0.62;
+      filter: blur(1.15px);
+    }
+
+    /* Session indicator is its own panel */
+    .session-panel{
+      margin-top:14px;
+      border:1px solid var(--crt-dim);
+      background:rgba(0,0,0,0.28);
+      padding:10px 12px;
+      font-size:10px;
+      letter-spacing:2px;
+      color:var(--crt-dim);
+      opacity:0.95;
+      filter: blur(0.25px);
+    }
+    .session-panel b{color:var(--crt-green);font-weight:400;filter:none}
+
+    nav{
+      margin-top:18px;
+      padding-top:18px;
+      border-top:1px solid var(--crt-dim);
+      display:flex;
+      gap:6px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    /* Sitewide button rule:
+       - default: black fill + green outline
+       - hover: green fill + glow
+       - active (current page): subtle green tint + glow, still readable at a glance
+    */
+    .btn,
+    .btn:visited,
+    nav a,
+    nav a:visited{
+      display:inline-block;
+      background:transparent;
+      color:var(--crt-green);
+      padding:12px 18px;
+      text-decoration:none;
+      font-size:10px;
+      text-transform:uppercase;
+      letter-spacing:2px;
+      font-weight:700;
+      border:2px solid var(--crt-green);
+      cursor:pointer;
+      transition:background .08s, color .08s, box-shadow .08s, opacity .08s;
+    }
+
+    .btn:hover{background:rgba(40,212,40,0.22);color:var(--crt-green);box-shadow:0 0 18px rgba(0,255,102,0.32);}
+    nav a:hover{background:rgba(40,212,40,0.22);color:var(--crt-green);box-shadow:0 0 18px rgba(0,255,102,0.30);}
+
+    nav a.active{background:rgba(40,212,40,0.42);box-shadow:0 0 34px rgba(0,255,102,0.70), 0 0 10px rgba(0,255,102,0.35) inset;animation:navpulse 1.4s infinite;}
+
+    /* keep nav alignment even */
+    nav a{
+      text-align:center;
+      min-width:200px;
+    }
+
+    .intro{
+      border:1px solid var(--crt-dim);
+      border-left:4px solid var(--crt-green);
+      padding:26px;
+      margin-bottom:24px;
+      background:rgba(0,0,0,0.18);
+    }
+    .intro h1{
+      font-size:14px;
+      margin-bottom:14px;
+      text-transform:uppercase;
+      letter-spacing:2px;
+      font-weight:700;
+      border-bottom:1px solid var(--crt-green);
+      padding-bottom:8px;
+    }
+    .intro p{margin-bottom:12px;line-height:1.8;opacity:0.86}
+
+    .back-link{
+      display:inline-block;
+      margin-bottom:18px;
+      color:var(--crt-green);
+      text-decoration:none;
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      opacity:0.7;
+    }
+    .back-link:hover{opacity:1}
+    .back-link::before{content:'← '}
+
+    .grid{display:block;margin-top:16px;border:1px solid var(--crt-dim)}
+    .card{
+      border-bottom:1px solid var(--crt-dim);
+      padding:20px 18px;
+      cursor:pointer;
+      background:rgba(0,0,0,0.10);
+    }
+    .card:hover{background:rgba(51,255,51,0.05)}
+    .card-id{font-size:10px;color:var(--crt-green);margin-bottom:8px;letter-spacing:1.5px;font-weight:700;opacity:0.7}
+    .card-title{font-size:16px;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
+    .card-date{font-size:10px;color:var(--crt-dim);margin-bottom:10px;opacity:0.7}
+    .card-desc{font-size:13px;line-height:1.6;opacity:0.82}
+
+    /* Feature block on archive landing */
+    .feature{
+      border:1px solid var(--crt-dim);
+      border-left:4px solid var(--crt-green);
+      padding:18px;
+      margin:18px 0 22px;
+      background:rgba(0,0,0,0.18);
+    }
+    .feature .feature-title{
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:2px;
+      opacity:0.85;
+      margin-bottom:10px;
+      border-bottom:1px solid var(--crt-green);
+      padding-bottom:8px;
+      font-weight:700;
+    }
+    .feature p{opacity:0.82}
+
+    /* Badges (not buttons) */
+    .badge{
+      display:inline-block;
+      padding:6px 10px;
+      border:1px dashed var(--crt-dim);
+      color:var(--crt-green);
+      background:rgba(0,0,0,0.22);
+      letter-spacing:2px;
+      font-size:10px;
+      cursor:default;
+      user-select:none;
+      opacity:0.95;
+    }
+    .badge.received{border-color:var(--crt-green)}
+    .badge.archived{border-color:var(--crt-dim);filter:blur(0.15px)}
+    .badge:hover{background:rgba(0,0,0,0.22);box-shadow:none}
+
+    .transmission-header{
+      border:2px solid var(--crt-green);
+      padding:26px;
+      margin-bottom:22px;
+      background:rgba(0,0,0,0.14);
+    }
+    .transmission-id{font-size:10px;margin-bottom:10px;letter-spacing:2px;font-weight:700;opacity:0.7}
+    .transmission-title{font-size:22px;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+    .transmission-date{font-size:10px;color:var(--crt-dim);margin-bottom:14px;opacity:0.7}
+
+    .section{
+      border:1px solid var(--crt-dim);
+      border-left:3px solid var(--crt-dim);
+      padding:18px;
+      margin-bottom:18px;
+      background:rgba(0,0,0,0.14);
+    }
+    .section-title{
+      font-size:11px;text-transform:uppercase;letter-spacing:2px;margin-bottom:14px;
+      border-bottom:1px solid var(--crt-green);padding-bottom:8px;font-weight:700
+    }
+
+    .breakdown-table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:11px;
+      border:1px solid var(--crt-dim);
+      margin:14px 0 18px;
+    }
+    .breakdown-table thead{background:rgba(51,255,51,0.08)}
+    .breakdown-table th{
+      padding:10px 12px;text-align:left;font-weight:700;letter-spacing:1.5px;font-size:10px;
+      border-right:1px solid var(--crt-dim);border-bottom:1px solid var(--crt-green)
+    }
+    .breakdown-table td{
+      padding:12px 12px;border-bottom:1px solid var(--crt-dim);border-right:1px solid var(--crt-dim);
+      overflow-wrap:anywhere;word-break:break-word;
+    }
+    .breakdown-table tbody tr:hover{background:rgba(51,255,51,0.05)}
+
+    .element-link{color:var(--crt-green);text-decoration:underline;cursor:pointer;font-weight:700;}
+    .element-link:hover{color:#fff;text-shadow:0 0 10px var(--crt-glow)}
+    .note-badge{display:inline-block;margin-left:8px;padding:1px 6px;border:1px solid var(--crt-dim);color:var(--crt-dim);border-radius:2px;font-size:9px;letter-spacing:1px;transform:translateY(-1px);opacity:0.9;}.note-badge:hover{border-color:var(--crt-green);color:var(--crt-green);} 
+
+    .type-badge{display:inline-block;padding:2px 6px;font-size:9px;letter-spacing:1px;font-weight:700;text-transform:uppercase;border:1px solid var(--crt-dim);opacity:0.9}
+
+    .confidence-high{color:var(--crt-green);font-weight:700}
+    .confidence-medium{color:#ffb000;font-weight:700}
+    .confidence-low{color:#ff3333;font-weight:700}
+
+    /* Filters on transmission pages */
+    .transmission-filters{
+      display:flex;gap:12px;align-items:center;flex-wrap:wrap;
+      margin:16px 0;padding:12px;border:1px solid var(--crt-dim);background:rgba(0,0,0,0.22);
+    }
+    .transmission-filters input,
+    .transmission-filters select{
+      flex:1;min-width:220px;
+      background:rgba(0,0,0,0.35);
+      border:1px solid var(--crt-green);
+      color:var(--crt-green);
+      padding:10px 12px;
+      font-family:var(--mono);
+      font-size:12px;
+      outline:none;
+    ;font-family:var(--mono);-webkit-appearance:none;appearance:none;background-image:linear-gradient(45deg, transparent 50%, var(--crt-green) 50%),linear-gradient(135deg, var(--crt-green) 50%, transparent 50%);background-position:calc(100% - 18px) calc(1em + 2px),calc(100% - 13px) calc(1em + 2px);background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:34px}
+    .transmission-filters select{flex:0.65;font-family:var(--mono);-webkit-appearance:none;appearance:none;background-image:linear-gradient(45deg, transparent 50%, var(--crt-green) 50%),linear-gradient(135deg, var(--crt-green) 50%, transparent 50%);background-position:calc(100% - 18px) calc(1em + 2px),calc(100% - 13px) calc(1em + 2px);background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:34px}
+
+    /* Audio player */
+    .audio-player{border:1px solid var(--crt-dim);padding:16px;margin:16px 0;background:rgba(0,0,0,0.26)}
+    .audio-controls{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+    .play-btn{
+      width:40px;height:40px;border:2px solid var(--crt-green);
+      background:transparent;color:var(--crt-green);cursor:pointer;
+      font-family:var(--mono);font-size:16px;transition:all .08s
+    }
+    .play-btn:hover{background:var(--crt-green);color:var(--crt-bg)}
+    .play-btn:disabled{opacity:0.35;cursor:not-allowed}
+    .time-display{font-family:var(--mono);font-size:11px;color:var(--crt-green);letter-spacing:1px;min-width:110px}
+    .timeline{flex:1;min-width:180px;height:4px;background:var(--crt-dim);position:relative;cursor:pointer}
+    .timeline-progress{height:100%;background:var(--crt-green);width:0%}
+    .timeline-handle{
+      position:absolute;top:-4px;width:12px;height:12px;background:var(--crt-green);
+      border:1px solid var(--crt-green);transform:translateX(-50%);cursor:pointer;
+      box-shadow:0 0 5px var(--crt-glow)
+    }
+    .volume-control{display:flex;align-items:center;gap:10px}
+    .volume-icon{font-family:var(--mono);font-size:11px;color:var(--crt-green);letter-spacing:1px;opacity:0.9}
+    .volume-slider{width:90px;height:4px;background:var(--crt-dim);position:relative;cursor:pointer}
+    .volume-level{height:100%;background:var(--crt-green);width:100%}
+    .track-info{font-family:var(--mono);font-size:10px;color:var(--crt-dim);margin-top:8px;opacity:0.75}
+
+    /* INFO page layout */
+
+    /* INFO PANEL SYSTEM */
+    .info-shell{border:1px solid var(--crt-dim);padding:18px;background:rgba(0,0,0,0.14);}
+    .info-grid{
+      display:grid;
+      grid-template-columns: 1.35fr 0.95fr;
+      grid-template-rows: auto 1fr;
+      gap:16px;
+      align-items:stretch;
+      min-height: 720px;
+    }
+
+    .info-left{
+      grid-column:1;
+      grid-row:1 / span 2;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+    }
+
+    .info-right{
+      grid-column:2;
+      grid-row:1 / span 2;
+      display:grid;
+      grid-template-rows: auto 1fr;
+      gap:16px;
+      min-height:0;
+    }
+
+    .panel.full-height{
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+    }
+
+    .chat-container{
+      flex:1;
+      min-height:360px;
+      height:auto;
+    }
+
+    .stay-grid{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      min-height:0;
+    }
+
+    .stay-grid .panel-input{
+      width:100%;
+    }
+
+    .stay-grid .rss-block{
+      margin-top:auto;
+    }
+    .panel{border:1px solid var(--crt-dim);padding:18px;background:rgba(0,0,0,0.14);}
+    .panel .section-title{margin-top:0;}
+    .chat-container{height:auto;overflow:auto;background:rgba(0,0,0,0.22);border:1px solid var(--crt-dim);}
+    .chat-input-area{margin-top:14px;padding:0;border:0;background:transparent;display:flex;gap:12px;align-items:center;}
+    .chat-input-area input{flex:1;min-width:0;}
+     .panel input[type="email"],
+    .panel input[type="text"]{
+      width:100%;
+      font-family:var(--mono);
+      font-size:11px;
+      padding:10px 12px;
+      border:1px solid var(--crt-green);
+      background:rgba(0,0,0,0.35);
+      color:var(--crt-green);
+      outline:none;
+    }
+
+    .panel .btn{
+      width:100%;
+      text-align:center;
+    }
+
+    .info-shell{border:1px solid var(--crt-dim);padding:16px;background:rgba(0,0,0,0.18)}
+
+    .newsletter-form{
+      border:1px solid var(--crt-dim);
+      border-left:4px solid var(--crt-green);
+      padding:18px;
+      background:rgba(0,0,0,0.22);
+    }
+    .newsletter-form h2{
+      font-size:12px;text-transform:uppercase;margin-bottom:12px;
+      border-bottom:1px solid var(--crt-green);padding-bottom:8px
+    }
+    .newsletter-form .subcopy{
+      font-size:11px;
+      opacity:0.78;
+      margin-bottom:12px;
+      line-height:1.7;
+    }
+    .newsletter-form input{
+      width:100%;
+      font-family:var(--mono);
+      font-size:11px;
+      padding:10px 12px;
+      border:1px solid var(--crt-green);
+      background:rgba(0,0,0,0.35);
+      color:var(--crt-green);
+      margin-bottom:10px;
+      outline:none;
+    }
+    .newsletter-form button{width:100%}
+    .newsletter-form .privacy{font-size:10px;margin-top:10px;opacity:0.62}
+    .newsletter-form .message{margin-top:10px;padding:10px;border:1px solid var(--crt-green);font-size:11px;display:none}
+    .newsletter-form .message.success{color:var(--crt-green)}
+    .newsletter-form .message.error{color:#ff3333;border-color:#ff3333}
+
+    /* Slideshow block */
+    .slideshow-box{
+      margin-top:16px;
+      border:1px solid var(--crt-dim);
+      background:rgba(0,0,0,0.22);
+      padding:14px;
+    }
+    .slideshow-stage{
+      position:relative;
+      width:100%;
+      aspect-ratio: 16 / 9;
+      border:1px solid var(--crt-dim);
+      overflow:auto;
+      background:#000;
+    }
+    .slideshow-stage img{
+      position:absolute;inset:0;
+      width:100%;height:100%;
+      object-fit:cover;
+      opacity:0;
+      transition:opacity 1.2s ease;
+      filter: grayscale(1) contrast(1.05) brightness(0.9) blur(0.2px);
+      transform:scale(1.01);
+    }
+    .slideshow-stage img.active{opacity:1}
+    .slideshow-stage::after{
+      content:'';
+      position:absolute;inset:0;
+      background:repeating-linear-gradient(
+        0deg,
+        rgba(0,0,0,0.20) 0px,
+        rgba(0,0,0,0.20) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      mix-blend-mode:overlay;
+      opacity:0.55;
+      pointer-events:none;
+    }
+    .slideshow-caption{
+      position:absolute;
+      left:10px;right:10px;bottom:10px;
+      padding:8px 10px;
+      border:1px solid var(--crt-dim);
+      background:rgba(0,0,0,0.55);
+      color:var(--crt-green);
+      font-size:10px;
+      letter-spacing:1px;
+      opacity:0.65;
+      filter: blur(0.15px);
+    }
+
+    footer{
+      margin-top:54px;
+      padding-top:18px;
+      border-top:1px solid var(--crt-dim);
+      font-size:9px;
+      color:var(--crt-dim);
+      text-align:center;
+      opacity:0.62;
+      line-height:1.8;
+    }
+
+    @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+
+    /* Mobile: no sideways scroll, tables become blocks */
+    @media (max-width: 900px){
+      nav a{min-width:auto;flex:1}
+      .info-shell{border:1px solid var(--crt-dim);padding:16px;background:rgba(0,0,0,0.18)}
+
+    .info-grid{grid-template-columns:1fr}
+    }
+
+    @media (max-width: 640px){
+      .container{padding:20px 12px}
+      .logo{font-size:24px}
+      .logo .cursor{font-size:14px;top:-3px}
+
+      nav{gap:8px}
+      nav a{padding:12px 10px;font-size:9px}
+
+      .breakdown-table thead{display:none}
+      .breakdown-table, .breakdown-table tbody, .breakdown-table tr{display:block;width:100%}
+      .breakdown-table tr{
+        border:1px solid var(--crt-dim);
+        margin:12px 0;
+        padding:10px;
+        background:rgba(0,0,0,0.20);
+      }
+      .breakdown-table td{
+        display:flex;
+        gap:6px;
+        width:100%;
+        padding:6px 0;
+        border:0;
+        align-items:flex-start;
+      }
+      .breakdown-table td:nth-child(1)::before{content:"TIME"; min-width:70px; color:var(--crt-dim); letter-spacing:1px;}
+      .breakdown-table td:nth-child(2)::before{content:"TYPE"; min-width:70px; color:var(--crt-dim); letter-spacing:1px;}
+      .breakdown-table td:nth-child(3)::before{content:"TITLE"; min-width:70px; color:var(--crt-dim); letter-spacing:1px;}
+      .breakdown-table td:nth-child(4)::before{content:"ARTIST"; min-width:70px; color:var(--crt-dim); letter-spacing:1px;}
+      .breakdown-table td:nth-child(5)::before{content:"YEAR"; min-width:70px; color:var(--crt-dim); letter-spacing:1px;}
+      .breakdown-table td:nth-child(6)::before{content:"CONF"; min-width:70px; color:var(--crt-dim); letter-spacing:1px;}
+    }
+
+    /* Session overlay (login) */
+    #session-overlay{
+      position:fixed;inset:0;
+      background:rgba(0,0,0,0.90);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:10000;
+      padding:20px;
+    }
+    #session-overlay.active{display:flex}
+
+    .session-window{
+      width:min(460px,100%);
+      border:1px solid var(--crt-dim);
+      background:rgba(0,0,0,0.55);
+      box-shadow:0 0 40px rgba(0,255,80,0.12);
+      padding:22px;
+      position:relative;
+    }
+
+    .session-window::before{
+      content:'';
+      position:absolute;inset:0;
+      background:repeating-linear-gradient(
+        0deg,
+        rgba(0,0,0,0.14) 0px,
+        rgba(0,0,0,0.14) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      opacity:0.65;
+      pointer-events:none;
+    }
+
+    .session-title{
+      position:relative;
+      text-align:center;
+      font-size:13px;
+      letter-spacing:3px;
+      text-transform:uppercase;
+      font-weight:700;
+      margin-bottom:16px;
+
+      /* playful broadcast ripple */
+      color: transparent;
+      background-image: linear-gradient(90deg,
+        rgba(0, 255, 120, 0.22) 0%,
+        rgba(0, 255, 120, 1.0) 40%,
+        rgba(0, 255, 120, 0.22) 80%);
+      background-size: 200% 100%;
+      background-position: 0% 50%;
+      -webkit-background-clip: text;
+      background-clip: text;
+
+      filter: blur(0.25px);
+      opacity: 0.98;
+      animation: titleSweep 2.4s linear infinite;
+      text-shadow:
+        0 0 10px rgba(0,255,100,0.18),
+        0 0 24px rgba(0,255,100,0.10);
+    }
+
+    @keyframes titleSweep {
+      0%   { background-position: 0% 50%;   filter: blur(0.55px); opacity: 0.90; }
+      35%  { filter: blur(0.08px); opacity: 1; }
+      50%  { background-position: 100% 50%; filter: blur(0.20px); opacity: 0.98; }
+      85%  { filter: blur(0.10px); opacity: 1; }
+      100% { background-position: 200% 50%; filter: blur(0.55px); opacity: 0.90; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .session-title { animation: none; filter: none; opacity: 1; background-position: 50% 50%; }
+    }
+
+    .session-row{
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      align-items:center;
+    }
+
+    .session-row label{
+      font-size:10px;
+      color:var(--crt-dim);
+      letter-spacing:2px;
+      text-transform:uppercase;
+      filter: blur(0.25px);
+    }
+
+    .session-input{
+      width:min(320px,100%);
+      border:1px solid var(--crt-green);
+      background:rgba(0,0,0,0.40);
+      color:var(--crt-green);
+      padding:12px 12px;
+      font-family:var(--mono);
+      font-size:12px;
+      outline:none;
+      text-transform:uppercase;
+      letter-spacing:2px;
+      text-align:center;
+    }
+
+    .session-actions{
+      position:relative;
+      display:flex;
+      justify-content:center;
+      margin-top:16px;
+    }
+
+    .session-actions .btn{
+      width:min(320px,100%);
+      text-align:center;
+    }
+
+    /* Persistent bottom player */
+    .persistent-player{
+      position:fixed;
+      left:0;right:0;bottom:0;
+      border-top:1px solid var(--crt-dim);
+      background:rgba(0,0,0,0.92);
+      padding:10px 12px;
+      z-index:9998;
+      display:none;
+    }
+    .persistent-player.active{display:block}
+    .persistent-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+    .persistent-title{font-size:10px;letter-spacing:2px;color:var(--crt-dim);opacity:0.9}
+    .persistent-title b{color:var(--crt-green);font-weight:700}
+    .persistent-audio{width:min(720px,100%);height:28px}
+    .persistent-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+    .small-btn{
+      padding:8px 10px;
+      font-size:9px;
+      letter-spacing:2px;
+      border:1px solid var(--crt-green);
+      background:transparent;
+      color:var(--crt-green);
+      cursor:pointer;
+    }
+    .small-btn:hover{background:var(--crt-green);color:var(--crt-bg)}
+
+
+
+    /* --- Overrides for consistency (Jan 18) --- */
+    nav a.active{background:rgba(40,212,40,0.30);box-shadow:0 0 22px rgba(0,255,102,0.38);animation:navpulse 1.6s infinite;}
+
+    .info-shell{min-height:720px;}
+    .info-grid{align-items:stretch;height:100%;min-height:720px;}
+    .info-right{display:flex;flex-direction:column;gap:14px;height:100%;}
+    .rss-panel{flex:1;display:flex;flex-direction:column;}
+
+    .chat-input-area{
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .chat-input-area input{
+      flex:1;
+      min-width:260px;
+      height:42px;
+    }
+    .chat-input-area .btn,
+    .chat-input-area button{
+      flex:0 0 180px;
+      height:42px;
+      min-width:180px;
+      text-align:center;
+    }
+
+    @media (max-width: 640px){
+      .chat-input-area input{min-width:0;}
+      .chat-input-area .btn,
+      .chat-input-area button{flex:0 0 140px;min-width:140px;}
+    }
+
+
+
+    /* --- ALIGN: INFO PAGE COLUMN HEIGHTS (discussion vs right stack) --- */
+    .info-grid{align-items:stretch;}
+    .info-grid > *{min-height:0;}
+    .info-right{display:flex;flex-direction:column;gap:16px;height:100%;min-height:0;}
+    .rss-panel{flex:1;display:flex;flex-direction:column;min-height:0;}
+    .rss-panel .btn{margin-top:auto;}
+
+
+    /* Artifact modal (click row for details) */
+    #element-modal{
+      position:fixed;inset:0;
+      background:rgba(0,0,0,0.90);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:10001;
+      padding:20px;
+    }
+    #element-modal.active{display:flex}
+    .element-window{
+      width:min(720px,100%);
+      border:1px solid var(--crt-dim);
+      background:rgba(0,0,0,0.55);
+      box-shadow:0 0 44px rgba(0,255,80,0.14);
+      padding:20px;
+      position:relative;
+    }
+    .element-window::before{
+      content:'';
+      position:absolute;inset:0;
+      background:repeating-linear-gradient(
+        0deg,
+        rgba(0,0,0,0.14) 0px,
+        rgba(0,0,0,0.14) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      opacity:0.55;
+      pointer-events:none;
+    }
+    .element-title{
+      position:relative;
+      font-size:12px;
+      letter-spacing:3px;
+      text-transform:uppercase;
+      font-weight:700;
+      margin-bottom:14px;
+      opacity:0.95;
+      filter: blur(0.25px);
+    }
+    .element-grid{
+      position:relative;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+    .element-field{
+      border:1px solid var(--crt-dim);
+      background:rgba(0,0,0,0.22);
+      padding:12px;
+      min-height:56px;
+    }
+    .element-label{
+      font-size:9px;
+      letter-spacing:2px;
+      text-transform:uppercase;
+      color:var(--crt-dim);
+      margin-bottom:6px;
+      opacity:0.9;
+    }
+    .element-value{
+      font-size:12px;
+      line-height:1.55;
+      color:var(--crt-green);
+      opacity:0.92;
+      overflow-wrap:anywhere;
+      word-break:break-word;
+    }
+    .element-wide{grid-column:1 / span 2}
+    .element-actions{position:relative;margin-top:14px;display:flex;justify-content:flex-end}
+    .element-actions .btn{width:min(220px,100%);}
+
+
+/* --- 
+/* --- Stability fixes: keep styles consistent across transmission tables --- */
+.elements-table{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:auto;
+}
+.elements-table th, .elements-table td{
+  padding:12px 12px;
+  vertical-align:top;
+  line-height:1.25;
+}
+.elements-table th{
+  text-transform:uppercase;
+  letter-spacing:0.12em;
+  font-size:11px;
+  opacity:0.9;
+}
+.elements-table td{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+
+/* Prevent awkward wraps in TYPE / YEAR / CONF columns */
+.elements-table td:nth-child(2),
+.elements-table th:nth-child(2),
+.elements-table td:nth-child(5),
+.elements-table th:nth-child(5),
+.elements-table td:nth-child(6),
+.elements-table th:nth-child(6){
+  white-space:nowrap;
+  overflow-wrap:normal;
+  word-break:normal;
+}
+.type-badge{ white-space:nowrap; }
+
+/* Slightly roomier columns so badges don't split */
+.elements-table td:nth-child(2), .elements-table th:nth-child(2){ width:120px; }
+.elements-table td:nth-child(5), .elements-table th:nth-child(5){ width:90px; }
+.elements-table td:nth-child(6), .elements-table th:nth-child(6){ width:90px; }
+
+/* Nav hover text should never invert to black */
+nav a:hover, nav a:focus-visible{
+  color:var(--green);
+}
+
+/* enforce modal hidden by default even if inline scripts misfire */
+#element-modal { display: none; }
+#element-modal.active { display: flex; }
+
+
+</style>
+</head>
+
+<body>
+
+  <!-- Session gate (centered, no explainer copy, no session id shown, no anonymous option) -->
+  <div id="session-overlay" aria-hidden="true">
+    <div class="session-window">
+      <div class="session-title">WLSN SIGNAL ARCHIVE TERMINAL</div>
+
+      <div class="session-row">
+        <label for="alias-input"></label>
+        <input id="alias-input" class="session-input" maxlength="18" autocomplete="off" spellcheck="false" placeholder="YOUR NAME">
+      </div>
+
+      <div class="session-actions">
+        <button id="enter-btn" class="btn" type="button">ENTER</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <header>
+      <div class="logo">WLSN<span class="cursor">█</span></div>
+      <div class="tagline">Western Light and Sound Network</div>
+      <div class="tagline tagline-sub">Signal Archive</div>
+
+      <div id="session-indicator" class="session-panel"></div>
+
+      <nav>
+        <a href="#transmissions" id="nav-transmissions">Broadcast Archive</a>
+        <a href="#info" id="nav-info">Info</a>
+      </nav>
+    </header>
+
+    <main id="app"></main>
+
+    <footer>
+      WLSN ARCHIVE SYSTEM | EST. 1967 | DECLASSIFIED 2025<br>
+      Produced by Brain Crampsmen for WLSN under the ONE Signal distribution mark.
+    </footer>
+  </div>
+
+  
+
+  <!-- Artifact modal -->
+  <div id="element-modal" aria-hidden="true">
+    <div class="element-window" role="dialog" aria-modal="true" aria-label="Artifact metadata">
+      <div class="element-title">ARTIFACT METADATA</div>
+      <div class="element-grid" id="element-grid"></div>
+      <div class="element-actions">
+        <button id="element-close" class="btn" type="button">CLOSE</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+    const D = {
+      transmissions: [
+        {
+          id:"001",
+          title:"Signal Test",
+          date:"1967-08-12",
+          dateFormatted:"12 AUG 1967",
+          audioUrl:"audio/transmission_001.mp3",
+          description:"First recorded transmission. Test pattern followed by audio fragments.",
+          notes:"Aired 12 AUG 1967. Recovered from magnetic tape December 18 2024, reel 001-A. Signal strength varied.",
+          elements:["e001","e002","e036","e003","e004"]
+        },
+        {
+          id:"002",
+          title:"You",
+          date:"1967-09-03",
+          dateFormatted:"03 SEP 1967",
+          audioUrl:"audio/transmission_002.mp3",
+          description:"Regular programming. Mix of commercial recordings and field recordings.",
+          notes:"Source uncertain. Possible aircheck from listening post.",
+          elements:["e005","e037","e006","e007"]
+        },
+        {
+          id:"003",
+          title:"Circles",
+          date:"1968-03-15",
+          dateFormatted:"15 MAR 1968",
+          audioUrl:"audio/transmission_003.mp3",
+          description:"Cut broadcast. Multiple sources spliced together.",
+          notes:"Tape quality good with wavering flutter and wow. Signal bleed appears intermittently.",
+          elements:["e3001","e3002","e3003","e3004","e3005","e3006","e3007","e3008","e3009","e3010","e3011","e3012","e3013","e3014","e3015","e3016","e3017","e3018","e3019","e3020","e3021","e3022","e3023","e3024","e3025","e3026","e3027","e3028","e3029","e3030","e3031","e3032","e3033","e3034","e3035","e3036","e3037","e3038","e3039","e3040","e3041","e3042","e3043","e3044","e3045","e3046","e3047","e3048","e3049","e3050","e3051","e3052","e3053","e3054","e3055","e3056","e3057","e3058","e3059","e3060","e3061","e3062","e3063","e3064","e3065","e3066","e3067","e3068","e3069","e3070","e3071","e3072","e3073","e3074"]
+        }
+      ],
+      elements: [
+        {id:"e001",transmission_id:"001",start_time:"00:00",end_time:"00:03",type:"unknown",title:"Adjacent channel interference",primary_credit:"Unknown",source:"WLSN Internal Recording",year:"1967",notes:"Male voice. Broadcast training evident.",confidence:"high"},
+        {id:"e002",transmission_id:"001",start_time:"00:45",end_time:"04:12",type:"song",title:"Blue in Green",primary_credit:"Miles Davis",source:"Kind of Blue (Columbia, 1959)",year:"1959",notes:"Partial capture. Fades early.",confidence:"high"},
+        {id:"e003",transmission_id:"001",start_time:"04:12",end_time:"04:30",type:"unknown",title:"Unidentified Voice Fragment",primary_credit:"Unknown",source:"Unknown",year:null,notes:"Female voice. Possible adjacent-channel crosstalk.",confidence:"low"},
+        {id:"e004",transmission_id:"001",start_time:"04:30",end_time:"05:00",type:"technical",title:"1kHz Reference Tone",primary_credit:"WLSN Technical",source:"Calibration Reference",year:"1967",notes:"Frequency reference signal.",confidence:"high"},
+        {id:"e036",transmission_id:"001",start_time:"02:18",end_time:"02:22",type:"unknown",title:"Carrier Wave Interference",primary_credit:"Unknown",source:"Unknown",year:null,notes:"Brief heterodyne whistle. Frequency bleed.",confidence:"low"},
+        {id:"e2001",transmission_id:"002",start_time:"",end_time:"",type:"sfx",title:"RAYS",primary_credit:"Unknown",year:"Unknown",source:"SFX library or film SFX (unverified)",notes:"",confidence:"low"},
+        {id:"e2002",transmission_id:"002",start_time:"",end_time:"",type:"song",title:"IT CAME FROM OUTER SPACE (score cue)",primary_credit:"Irving Gertz, Herman Stein",year:"1953",source:"It Came from Outer Space (Universal, 1953)",notes:"Credit is for the film’s music. Exact cue name depends on the rip.",confidence:"medium"},
+        {id:"e2003",transmission_id:"002",start_time:"",end_time:"",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",year:"Unknown",source:"receiver scan / shortwave sample (unverified)",notes:"",confidence:"medium"},
+        {id:"e2004",transmission_id:"002",start_time:"",end_time:"",type:"jingle",title:"WHBQ (station ID)",primary_credit:"WHBQ (Memphis)",year:"Unknown",source:"radio station jingle (specific package unknown)",notes:"",confidence:"medium"},
+        {id:"e2005",transmission_id:"002",start_time:"",end_time:"",type:"narration",title:"WOLFMAN JACK (radio voice)",primary_credit:"Wolfman Jack",year:"1973",source:"American Graffiti (1973) radio sequences",notes:"",confidence:"medium"},
+        {id:"e2006",transmission_id:"002",start_time:"",end_time:"",type:"narration",title:"ROBINSON CRUSOE ON MARS (narration excerpt)",primary_credit:"Unverified narrator voice (film includes Adam West per cast)",year:"1964",source:"Robinson Crusoe on Mars (Filmways, 1964)",notes:"",confidence:"medium"},
+        {id:"e2007",transmission_id:"002",start_time:"",end_time:"",type:"commercial",title:"PILLSBURY CHOCOLATE CHIP COOKIES (Something from the oven)",primary_credit:"Pillsbury",year:"Unknown",source:"TV ad spot",notes:"Slogan line per your correction.",confidence:"medium"},
+        {id:"e2008",transmission_id:"002",start_time:"",end_time:"",type:"commercial",title:"CAMEL CIGARETTES (Have a real cigarette)",primary_credit:"Camel",year:"Unknown",source:"TV or radio ad spot",notes:"Campaign line per your correction.",confidence:"medium"},
+        {id:"e2009",transmission_id:"002",start_time:"",end_time:"",type:"jingle",title:"MUSIC TIME (jingle)",primary_credit:"Unknown",year:"Unknown",source:"station kit fragment",notes:"",confidence:"low"},
+        {id:"e2010",transmission_id:"002",start_time:"",end_time:"",type:"song",title:"IT’S YOU",primary_credit:"The Millennium",year:"1968",source:"The Millennium recordings (Columbia-era, see release listing)",notes:"",confidence:"medium"},
+        {id:"e2011",transmission_id:"002",start_time:"",end_time:"",type:"narration",title:"YOU ARE LISTENING TO COLOR RADIO FROM SPACE",primary_credit:"WLSN (in-show VO)",year:"2026",source:"original narration",notes:"",confidence:"high"},
+        {id:"e2012",transmission_id:"002",start_time:"",end_time:"",type:"narration",title:"ROD SERLING (Twilight Zone pitch / promo clip)",primary_credit:"Rod Serling",year:"Unknown",source:"promo or pitch footage (needs exact clip)",notes:"",confidence:"low"},
+        {id:"e2013",transmission_id:"002",start_time:"",end_time:"",type:"sfx",title:"MAGIC SPELL",primary_credit:"Unknown",year:"Unknown",source:"SFX library or film SFX (unverified)",notes:"",confidence:"low"},
+        {id:"e2014",transmission_id:"002",start_time:"",end_time:"",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",year:"Unknown",source:"",notes:"",confidence:"medium"},
+        {id:"e2015",transmission_id:"002",start_time:"",end_time:"",type:"technical",title:"RADIO SIGNAL BEEPING",primary_credit:"Unknown",year:"Unknown",source:"signal tone or teletype style beeps (unverified)",notes:"",confidence:"low"},
+        {id:"e2016",transmission_id:"002",start_time:"",end_time:"",type:"commercial",title:"COKE WEIGHT LOSS (diet product ad)",primary_credit:"Coca-Cola brand family (exact product unknown)",year:"Unknown",source:"commercial clip (needs exact brand name to date)",notes:"",confidence:"low"},
+        {id:"e2017",transmission_id:"002",start_time:"",end_time:"",type:"song",title:"2002 A HIT SONG",primary_credit:"The Free Design",year:"1969",source:"The Free Design, “Heaven/Earth” release info",notes:"",confidence:"medium"},
+        {id:"e2018",transmission_id:"002",start_time:"",end_time:"",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",year:"Unknown",source:"",notes:"",confidence:"medium"},
+        {id:"e2019",transmission_id:"002",start_time:"",end_time:"",type:"commercial",title:"SUGAR CRISP (Granny Goodwitch)",primary_credit:"Post",year:"Unknown",source:"Post Sugar Crisp TV spot",notes:"Agency: Benton & Bowles (DMB&B).",confidence:"medium"},
+        {id:"e2020",transmission_id:"002",start_time:"",end_time:"",type:"jingle",title:"93 KHJ MORE MUSIC (station ID)",primary_credit:"KHJ (Los Angeles)",year:"Unknown",source:"station jingle (package unverified)",notes:"",confidence:"medium"},
+        {id:"e2021",transmission_id:"002",start_time:"",end_time:"",type:"song",title:"IT’S MY PARTY (T.A.M.I. Show performance)",primary_credit:"Lesley Gore",year:"1964",source:"The T.A.M.I. Show (1964) performance clip",notes:"",confidence:"medium"},
+        {id:"e2022",transmission_id:"002",start_time:"",end_time:"",type:"jingle",title:"MUSICRADIO WLS (ID)",primary_credit:"WLS (Chicago)",year:"1970s",source:"WLS jingle packages (exact series TBD)",notes:"PAMS style packages, singers often credited as Anita Kerr Singers in WLS jingle history communities.",confidence:"low"},
+        {id:"e2023",transmission_id:"002",start_time:"",end_time:"",type:"song",title:"DOUBLE YELLOW LINE",primary_credit:"The Music Machine",year:"Unknown",source:"record release (TBD)",notes:"Needs exact release reference, multiple listings exist.",confidence:"low"},
+        {id:"e2024",transmission_id:"002",start_time:"",end_time:"",type:"song",title:"TOMORROW",primary_credit:"Strawberry Alarm Clock",year:"1967",source:"",notes:"",confidence:"medium"},
+        {id:"e2025",transmission_id:"002",start_time:"",end_time:"",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",year:"Unknown",source:"",notes:"",confidence:"medium"},
+        {id:"e2026",transmission_id:"002",start_time:"",end_time:"",type:"narration",title:"BATMAN IN COLOR (Hi Diddle Riddle)",primary_credit:"Batman (1966 TV series)",year:"1966",source:"Batman episode “Hi Diddle Riddle”",notes:"",confidence:"medium"},
+        {id:"e2027",transmission_id:"002",start_time:"",end_time:"",type:"song",title:"SCOOBY-DOO WHERE ARE YOU (theme)",primary_credit:"Hoyt Curtin",year:"1969",source:"Scooby-Doo, Where Are You! (CBS, 1969)",notes:"",confidence:"high"},
+        {id:"e2028",transmission_id:"002",start_time:"",end_time:"",type:"song",title:"THE PROPER ORNAMENTS",primary_credit:"Carpenters Union",year:"Unknown",source:"recording (needs reference link)",notes:"",confidence:"low"},
+        {id:"e2029",transmission_id:"002",start_time:"",end_time:"",type:"narration",title:"NIGHTMARE NARRATION (unknown source)",primary_credit:"Unknown",year:"Unknown",source:"your “Nightmare narration” clip",notes:"",confidence:"low"},
+        {id:"e2030",transmission_id:"002",start_time:"",end_time:"",type:"sfx",title:"SAMANTHA NOSE TWITCH",primary_credit:"Bewitched",year:"1964",source:"Bewitched TV SFX",notes:"",confidence:"medium"},
+        {id:"e2031",transmission_id:"002",start_time:"",end_time:"",type:"sfx",title:"AUDIENCE LAUGHTER",primary_credit:"Bewitched (or generic sitcom laugh track)",year:"Unknown",source:"TV audio",notes:"",confidence:"low"},
+        {id:"e2032",transmission_id:"002",start_time:"",end_time:"",type:"jingle",title:"MUSICRADIO WLS (multiple idents)",primary_credit:"WLS",year:"1970s",source:"WLS jingle packages",notes:"",confidence:"low"},
+        {id:"e2033",transmission_id:"002",start_time:"",end_time:"",type:"sfx",title:"RAYS",primary_credit:"Unknown",year:"Unknown",source:"",notes:"",confidence:"low"},
+        {id:"e2034",transmission_id:"002",start_time:"",end_time:"",type:"song",title:"DOUBLE YELLOW LINE (repeat)",primary_credit:"The Music Machine",year:"Unknown",source:"",notes:"",confidence:"low"},
+        {id:"e2035",transmission_id:"002",start_time:"",end_time:"",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",year:"Unknown",source:"",notes:"",confidence:"medium"},
+        {id:"e2036",transmission_id:"002",start_time:"",end_time:"",type:"song",title:"SHE LOVES YOU",primary_credit:"The Beatles",year:"1963",source:"single release era",notes:"",confidence:"high"},
+        {id:"e2037",transmission_id:"002",start_time:"",end_time:"",type:"jingle",title:"93 KHJ (ID)",primary_credit:"KHJ",year:"Unknown",source:"",notes:"",confidence:"medium"},
+        {id:"e2038",transmission_id:"002",start_time:"",end_time:"",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",year:"Unknown",source:"",notes:"",confidence:"medium"},
+        {id:"e2039",transmission_id:"002",start_time:"",end_time:"",type:"song",title:"GOD ONLY KNOWS",primary_credit:"The Beach Boys",year:"1966",source:"Pet Sounds era",notes:"",confidence:"high"},
+        {id:"e2040",transmission_id:"002",start_time:"",end_time:"",type:"song",title:"IT CAME FROM OUTER SPACE (score cue, repeat)",primary_credit:"Irving Gertz, Herman Stein",year:"1953",source:"",notes:"",confidence:"medium"},
+        {id:"e2041",transmission_id:"002",start_time:"",end_time:"",type:"narration",title:"ROBINSON CRUSOE ON MARS (narration excerpt, repeat)",primary_credit:"Unverified narrator voice",year:"1964",source:"",notes:"",confidence:"medium"},
+        {id:"e2042",transmission_id:"002",start_time:"",end_time:"",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",year:"Unknown",source:"",notes:"",confidence:"medium"},
+        {id:"e2043",transmission_id:"002",start_time:"",end_time:"",type:"narration",title:"BEACH BOYS TV SPECIAL (Surf’s Up segment)",primary_credit:"The Beach Boys",year:"Unknown",source:"TV special clip",notes:"needs exact special title to date",confidence:"low"},
+        {id:"e2044",transmission_id:"002",start_time:"",end_time:"",type:"sfx",title:"MAGIC SPELL",primary_credit:"Unknown",year:"Unknown",source:"",notes:"",confidence:"low"},
+        {id:"e2045",transmission_id:"002",start_time:"",end_time:"",type:"song",title:"UNDERDOG",primary_credit:"Sly & The Family Stone",year:"1967",source:"",notes:"",confidence:"high"},
+        {id:"e2046",transmission_id:"002",start_time:"",end_time:"",type:"sfx",title:"RAYS",primary_credit:"Unknown",year:"Unknown",source:"",notes:"",confidence:"low"},
+        {id:"e2047",transmission_id:"002",start_time:"",end_time:"",type:"song",title:"SCOOBY-DOO UNDERSCORE",primary_credit:"Hoyt Curtin (likely)",year:"1969",source:"",notes:"Low until you confirm it’s actually from the show.",confidence:"low"},
+        {id:"e2048",transmission_id:"002",start_time:"",end_time:"",type:"jingle",title:"MUSICRADIO WLS (ID, repeat)",primary_credit:"WLS",year:"1970s",source:"",notes:"",confidence:"low"},
+        {id:"e2049",transmission_id:"002",start_time:"",end_time:"",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",year:"Unknown",source:"",notes:"",confidence:"medium"},
+        {id:"e2050",transmission_id:"002",start_time:"",end_time:"",type:"narration",title:"ROBINSON CRUSOE ON MARS (narration excerpt, repeat)",primary_credit:"film includes Adam West per cast",year:"1964",source:"",notes:"",confidence:"medium"},
+        {id:"e2051",transmission_id:"002",start_time:"",end_time:"",type:"sfx",title:"MAGIC SPELL",primary_credit:"Unknown",year:"Unknown",source:"",notes:"",confidence:"low"},
+        {id:"e2052",transmission_id:"002",start_time:"",end_time:"",type:"song",title:"IT SEEMS TO ME",primary_credit:"The Gestures",year:"1964",source:"",notes:"",confidence:"medium"},
+        {id:"e2053",transmission_id:"002",start_time:"",end_time:"",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",year:"Unknown",source:"",notes:"",confidence:"medium"},
+        {id:"e2054",transmission_id:"002",start_time:"",end_time:"",type:"commercial",title:"KOOL-AID KIDS (Australia)",primary_credit:"Kool-Aid, General Foods",year:"Unknown",source:"",notes:"Needs verifying to avoid being wrong.",confidence:"low"},
+        {id:"e2055",transmission_id:"002",start_time:"",end_time:"",type:"song",title:"RUN RUN RUN",primary_credit:"The Gestures",year:"1964",source:"",notes:"",confidence:"medium"},
+        {id:"e2056",transmission_id:"002",start_time:"",end_time:"",type:"technical",title:"RADIO TUNING",primary_credit:"Unknown",year:"Unknown",source:"",notes:"",confidence:"medium"},
+        {id:"e2057",transmission_id:"002",start_time:"",end_time:"",type:"narration",title:"ROBINSON CRUSOE ON MARS (narration excerpt, repeat)",primary_credit:"film includes Adam West per cast",year:"1964",source:"",notes:"",confidence:"medium"},
+        {id:"e2058",transmission_id:"002",start_time:"",end_time:"",type:"narration",title:"93 KHJ WEATHER REPORT",primary_credit:"KHJ",year:"Unknown",source:"",notes:"",confidence:"low"},
+        {id:"e2059",transmission_id:"002",start_time:"",end_time:"",type:"song",title:"IN MY LONELY ROOM",primary_credit:"Martha Reeves & The Vandellas",year:"1964",source:"",notes:"",confidence:"high"},
+        {id:"e2060",transmission_id:"002",start_time:"",end_time:"",type:"narration",title:"BATMAN IN COLOR (music or tag)",primary_credit:"Batman (1966 TV series)",year:"1966",source:"",notes:"",confidence:"low"},
+        {id:"e2061",transmission_id:"002",start_time:"",end_time:"",type:"sfx",title:"SCREAM (Nightmare short film, unknown)",primary_credit:"Unknown",year:"Unknown",source:"",notes:"",confidence:"low"},
+        {id:"e2062",transmission_id:"002",start_time:"",end_time:"",type:"song",title:"TOMORROW (repeat)",primary_credit:"Strawberry Alarm Clock",year:"1967",source:"",notes:"",confidence:"medium"},
+        {id:"e2063",transmission_id:"002",start_time:"",end_time:"",type:"narration",title:"COLOR RADIO FROM SPACE (credits VO)",primary_credit:"WLSN (your production)",year:"2026",source:"",notes:"",confidence:"high"},
+        {id:"e2064",transmission_id:"002",start_time:"",end_time:"",type:"technical",title:"SHORTWAVE HAMRADIO RECEIVER",primary_credit:"Unknown",year:"Unknown",source:"",notes:"",confidence:"medium"},
+        {id:"e2065",transmission_id:"002",start_time:"",end_time:"",type:"narration",title:"THIS HAS BEEN A FILMWAYS PRESENTATION (Zsa Zsa Gabor)",primary_credit:"Zsa Zsa Gabor",year:"Unknown",source:"Filmways television end tag variant",notes:"",confidence:"low"},
+        {id:"e2066",transmission_id:"002",start_time:"",end_time:"",type:"jingle",title:"MUSICRADIO WLS (ONE tag, per your note)",primary_credit:"WLS",year:"1970s",source:"WLS jingle packages",notes:"",confidence:"low"},
+        {id:"e2067",transmission_id:"002",start_time:"",end_time:"",type:"technical",title:"SHORTWAVE HAMRADIO RECEIVER (repeat)",primary_credit:"Unknown",year:"Unknown",source:"",notes:"",confidence:"medium"},
+        {id:"e3001", transmission_id:"003", start_time:"", end_time:"", type:"sfx", title:"RAYS", primary_credit:"Universal Sound Effects Library", source:"Universal Sound Effects Library", year:"1960s", notes:"", confidence:"medium"},
+        {id:"e3002", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"IT CAME FROM OUTER SPACE (music cue)", primary_credit:"Film soundtrack", source:"Film soundtrack", year:"1953", notes:"", confidence:"medium"},
+        {id:"e3003", transmission_id:"003", start_time:"", end_time:"", type:"sfx", title:"RADIO TUNING", primary_credit:"Universal Sound Effects Library", source:"Universal Sound Effects Library", year:"1960s", notes:"", confidence:"medium"},
+        {id:"e3004", transmission_id:"003", start_time:"", end_time:"", type:"sfx", title:"HAM RADIO TUNING", primary_credit:"Universal Sound Effects Library", source:"Universal Sound Effects Library", year:"1960s", notes:"", confidence:"medium"},
+        {id:"e3005", transmission_id:"003", start_time:"", end_time:"", type:"narration", title:"LOST IN SPACE (dialogue/VO)", primary_credit:"Lost in Space (TV series)", source:"TV audio", year:"1965", notes:"", confidence:"medium"},
+        {id:"e3006", transmission_id:"003", start_time:"", end_time:"", type:"narration", title:"Dimension X (1950s sci-fi radio story)", primary_credit:"Dimension X (radio)", source:"Radio broadcast", year:"1950s", notes:"", confidence:"medium"},
+        {id:"e3007", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"TWILIGHT ZONE THEME", primary_credit:"The Twilight Zone", source:"TV theme", year:"1959", notes:"", confidence:"high"},
+        {id:"e3008", transmission_id:"003", start_time:"", end_time:"", type:"narration", title:"1950s UFO documentary excerpt", primary_credit:"Unknown", source:"Documentary audio", year:"1950s", notes:"", confidence:"low"},
+        {id:"e3009", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"GOD ONLY KNOWS", primary_credit:"The Beach Boys", source:"Capitol Records", year:"1966", notes:"", confidence:"high"},
+        {id:"e3010", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"I WANNA BE LIKE YOU (The Jungle Book)", primary_credit:"The Jungle Book (Disney)", source:"Film soundtrack", year:"1967", notes:"", confidence:"high"},
+        {id:"e3011", transmission_id:"003", start_time:"", end_time:"", type:"jingle", title:"WLS (station ident)", primary_credit:"WLS", source:"Broadcast jingle", year:"1960s", notes:"", confidence:"medium"},
+        {id:"e3012", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"AREN’T YOU GLAD (studio session)", primary_credit:"The Beach Boys", source:"Session recording", year:"1967", notes:"", confidence:"medium"},
+        {id:"e3013", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"THE DANCE AT THE GYM (West Side Story)", primary_credit:"West Side Story", source:"Film soundtrack", year:"1961", notes:"", confidence:"high"},
+        {id:"e3014", transmission_id:"003", start_time:"", end_time:"", type:"narration", title:"BATMAN IN COLOR (music/tag)", primary_credit:"Batman (1966 TV series)", source:"TV audio", year:"1966", notes:"", confidence:"medium"},
+        {id:"e3015", transmission_id:"003", start_time:"", end_time:"", type:"commercial", title:"COCOA PUFFS", primary_credit:"General Mills", source:"TV/radio spot", year:"1960s", notes:"", confidence:"medium"},
+        {id:"e3016", transmission_id:"003", start_time:"", end_time:"", type:"commercial", title:"COKE (1960s spot)", primary_credit:"Coca-Cola", source:"TV/radio spot", year:"1960s", notes:"", confidence:"medium"},
+        {id:"e3017", transmission_id:"003", start_time:"", end_time:"", type:"sfx", title:"RADIO TUNING", primary_credit:"Universal Sound Effects Library", source:"Universal Sound Effects Library", year:"1960s", notes:"", confidence:"medium"},
+        {id:"e3018", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"CIRCLES", primary_credit:"The Fleur de Lys", source:"Deram/Decca era single", year:"1966", notes:"", confidence:"high"},
+        {id:"e3019", transmission_id:"003", start_time:"", end_time:"", type:"narration", title:"YOU ARE LISTENING TO COLOR RADIO FROM SPACE", primary_credit:"WLSN (your production)", source:"WLSN production", year:"2020s", notes:"", confidence:"high"},
+        {id:"e3020", transmission_id:"003", start_time:"", end_time:"", type:"sfx", title:"RADIO TUNING", primary_credit:"Universal Sound Effects Library", source:"Universal Sound Effects Library", year:"1960s", notes:"", confidence:"medium"},
+        {id:"e3021", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"ALL DAY AND ALL OF THE NIGHT", primary_credit:"The Kinks", source:"Pye Records", year:"1964", notes:"", confidence:"high"},
+        {id:"e3022", transmission_id:"003", start_time:"", end_time:"", type:"sfx", title:"HAM RADIO TUNING", primary_credit:"Universal Sound Effects Library", source:"Universal Sound Effects Library", year:"1960s", notes:"", confidence:"medium"},
+        {id:"e3023", transmission_id:"003", start_time:"", end_time:"", type:"narration", title:"Science Fiction Stories: From the Years Beyond 2000 A.D.", primary_credit:"Radio anthology", source:"Radio broadcast", year:"1950s", notes:"", confidence:"medium"},
+        {id:"e3024", transmission_id:"003", start_time:"", end_time:"", type:"commercial", title:"COCOA PUFFS", primary_credit:"General Mills", source:"TV/radio spot", year:"1960s", notes:"", confidence:"medium"},
+        {id:"e3025", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"BANSHEE", primary_credit:"Evolmia", source:"Recording", year:"1960s", notes:"", confidence:"low"},
+        {id:"e3026", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"SARAH SATURDAY", primary_credit:"Lazy Smoke", source:"Recording", year:"1968", notes:"", confidence:"medium"},
+        {id:"e3027", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"OOH BABY BABY", primary_credit:"Smokey Robinson & the Miracles", source:"Tamla/Motown", year:"1965", notes:"", confidence:"high"},
+        {id:"e3028", transmission_id:"003", start_time:"", end_time:"", type:"studio", title:"MURRAY WILSON CRASHES RECORDING SESSION", primary_credit:"The Beach Boys", source:"Session audio", year:"1960s", notes:"", confidence:"low"},
+        {id:"e3029", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"MRS BLUEBIRD", primary_credit:"Eternity’s Children", source:"Recording", year:"1960s", notes:"", confidence:"low"},
+        {id:"e3030", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"THERE IS NOTHING MORE TO SAY", primary_credit:"The Millennium", source:"Recording", year:"1960s", notes:"", confidence:"medium"},
+        {id:"e3031", transmission_id:"003", start_time:"", end_time:"", type:"sfx", title:"EMERGENCY BROADCAST SYSTEM TONE", primary_credit:"Universal Sound Effects Library", source:"Universal Sound Effects Library", year:"1960s", notes:"", confidence:"medium"},
+        {id:"e3032", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"MEANT FOR YOU", primary_credit:"The Beach Boys", source:"Session/outtake", year:"1960s", notes:"", confidence:"low"},
+        {id:"e3033", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"I’M LOST", primary_credit:"Nat King Cole", source:"Recording", year:"1960s", notes:"", confidence:"low"},
+        {id:"e3034", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"FOR NO ONE (isolated drums and bass)", primary_credit:"The Beatles", source:"Studio stem", year:"1966", notes:"", confidence:"medium"},
+        {id:"e3035", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"BABY TALK", primary_credit:"Jan and Dean", source:"Recording", year:"1961", notes:"", confidence:"medium"},
+        {id:"e3036", transmission_id:"003", start_time:"", end_time:"", type:"narration", title:"CHUCK BRITZ on Brian Wilson", primary_credit:"Chuck Britz", source:"Interview", year:"1960s", notes:"", confidence:"medium"},
+        {id:"e3037", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"ONCE WAS A TIME I THOUGHT", primary_credit:"The Mamas and the Papas", source:"Recording", year:"1960s", notes:"", confidence:"medium"},
+        {id:"e3038", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"YOU CAN’T HURRY LOVE", primary_credit:"The Supremes", source:"Motown", year:"1966", notes:"", confidence:"high"},
+        {id:"e3039", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"FRIENDS (vocal only, pitched up/sped up)", primary_credit:"The Beach Boys", source:"Studio stem", year:"1968", notes:"", confidence:"medium"},
+        {id:"e3040", transmission_id:"003", start_time:"", end_time:"", type:"commercial", title:"NOTHIN SAYS LOVE LIKE SOMETHING FROM THE OVEN", primary_credit:"Unknown", source:"TV/radio spot", year:"1960s", notes:"", confidence:"low"},
+        {id:"e3041", transmission_id:"003", start_time:"", end_time:"", type:"commercial", title:"THE KOOL-AID KIDS (Japan)", primary_credit:"Kool-Aid", source:"TV spot", year:"1960s", notes:"", confidence:"low"},
+        {id:"e3042", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"EVEN STEVEN (early \"Busy Doin’ Nothing\")", primary_credit:"The Beach Boys", source:"Session/outtake", year:"1968", notes:"", confidence:"medium"},
+        {id:"e3043", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"ADDITIONAL HARMONIES", primary_credit:"WLSN (your production)", source:"WLSN production", year:"2020s", notes:"", confidence:"high"},
+        {id:"e3044", transmission_id:"003", start_time:"", end_time:"", type:"sfx", title:"NIGHTMARE short film (unknown)", primary_credit:"Unknown", source:"Unknown", year:"1960s", notes:"Year unknown. CONF LOW.", confidence:"low"},
+        {id:"e3045", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"DENNY’S DRUMS", primary_credit:"The Beach Boys", source:"Session/outtake", year:"1960s", notes:"", confidence:"low"},
+        {id:"e3046", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"ALL DAY AND ALL OF THE NIGHT (repeat)", primary_credit:"The Kinks", source:"Pye Records", year:"1964", notes:"", confidence:"high"},
+        {id:"e3047", transmission_id:"003", start_time:"", end_time:"", type:"commercial", title:"MYSTERY DATE", primary_credit:"Milton Bradley", source:"TV spot", year:"1960s", notes:"", confidence:"medium"},
+        {id:"e3048", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"DREAM AWAY", primary_credit:"Afterglow", source:"Recording", year:"1960s", notes:"", confidence:"low"},
+        {id:"e3049", transmission_id:"003", start_time:"", end_time:"", type:"commercial", title:"MYSTERY DATE (repeat)", primary_credit:"Milton Bradley", source:"TV spot", year:"1960s", notes:"", confidence:"medium"},
+        {id:"e3050", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"AREN’T YOU GLAD (instrumental tracking session)", primary_credit:"The Beach Boys", source:"Session recording", year:"1967", notes:"", confidence:"medium"},
+        {id:"e3051", transmission_id:"003", start_time:"", end_time:"", type:"jingle", title:"WLS (station ident)", primary_credit:"WLS", source:"Broadcast jingle", year:"1960s", notes:"", confidence:"medium"},
+        {id:"e3052", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"LIVING WITHOUT YOU", primary_credit:"Randy Newman", source:"Recording", year:"1968", notes:"", confidence:"high"},
+        {id:"e3053", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"THE DANCE AT THE GYM (repeat)", primary_credit:"West Side Story", source:"Film soundtrack", year:"1961", notes:"", confidence:"high"},
+        {id:"e3054", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"GOIN’ OUT OF MY HEAD (instrumental)", primary_credit:"The Zombies", source:"Recording", year:"1960s", notes:"", confidence:"low"},
+        {id:"e3055", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"MAKE WAY FOR DADDY (TV theme)", primary_credit:"Unknown", source:"TV theme", year:"1960s", notes:"", confidence:"low"},
+        {id:"e3056", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"EASY AS 1 2 3", primary_credit:"Jan and Dean", source:"Recording", year:"1966", notes:"", confidence:"medium"},
+        {id:"e3057", transmission_id:"003", start_time:"", end_time:"", type:"commercial", title:"KOOL-AID KIDS (Japan) (repeat)", primary_credit:"Kool-Aid", source:"TV spot", year:"1960s", notes:"", confidence:"low"},
+        {id:"e3058", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"THERE IS NOTHING MORE TO SAY (repeat)", primary_credit:"The Millennium", source:"Recording", year:"1960s", notes:"", confidence:"medium"},
+        {id:"e3059", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"LET THE WIND BLOW", primary_credit:"The Beach Boys", source:"Capitol Records", year:"1967", notes:"", confidence:"high"},
+        {id:"e3060", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"WHERE DO I GO", primary_credit:"The Free Design", source:"Recording", year:"1960s", notes:"", confidence:"low"},
+        {id:"e3061", transmission_id:"003", start_time:"", end_time:"", type:"sfx", title:"HAM RADIO TUNING", primary_credit:"Universal Sound Effects Library", source:"Universal Sound Effects Library", year:"1960s", notes:"", confidence:"medium"},
+        {id:"e3062", transmission_id:"003", start_time:"", end_time:"", type:"commercial", title:"COKE (repeat)", primary_credit:"Coca-Cola", source:"TV/radio spot", year:"1960s", notes:"", confidence:"medium"},
+        {id:"e3063", transmission_id:"003", start_time:"", end_time:"", type:"sfx", title:"FLUTTERING TAPE", primary_credit:"Universal Sound Effects Library", source:"Universal Sound Effects Library", year:"1960s", notes:"", confidence:"medium"},
+        {id:"e3064", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"LOST IN SPACE (music cue)", primary_credit:"Lost in Space (TV series)", source:"TV score", year:"1965", notes:"", confidence:"medium"},
+        {id:"e3065", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"ME AND MY ARROW", primary_credit:"Harry Nilsson", source:"RCA", year:"1971", notes:"", confidence:"high"},
+        {id:"e3066", transmission_id:"003", start_time:"", end_time:"", type:"narration", title:"COLOR RADIO CREDITS", primary_credit:"WLSN (your production)", source:"WLSN production", year:"2020s", notes:"", confidence:"high"},
+        {id:"e3067", transmission_id:"003", start_time:"", end_time:"", type:"sfx", title:"RAYS (repeat)", primary_credit:"Universal Sound Effects Library", source:"Universal Sound Effects Library", year:"1960s", notes:"", confidence:"medium"},
+        {id:"e3068", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"MY FAVOURITE MARTIAN (theme/cue)", primary_credit:"My Favorite Martian", source:"TV theme", year:"1963", notes:"", confidence:"medium"},
+        {id:"e3069", transmission_id:"003", start_time:"", end_time:"", type:"sfx", title:"RADIO TUNING", primary_credit:"Universal Sound Effects Library", source:"Universal Sound Effects Library", year:"1960s", notes:"", confidence:"medium"},
+        {id:"e3070", transmission_id:"003", start_time:"", end_time:"", type:"sfx", title:"MAGIC SPELL", primary_credit:"Universal Sound Effects Library", source:"Universal Sound Effects Library", year:"1960s", notes:"", confidence:"medium"},
+        {id:"e3071", transmission_id:"003", start_time:"", end_time:"", type:"narration", title:"LOST IN SPACE (dialogue/VO)", primary_credit:"Lost in Space (TV series)", source:"TV audio", year:"1965", notes:"", confidence:"medium"},
+        {id:"e3072", transmission_id:"003", start_time:"", end_time:"", type:"song", title:"20TH CENTURY FOX THEME", primary_credit:"20th Century Fox", source:"Studio fanfare", year:"1933", notes:"", confidence:"medium"},
+        {id:"e3073", transmission_id:"003", start_time:"", end_time:"", type:"jingle", title:"WLS (station ident)", primary_credit:"WLS", source:"Broadcast jingle", year:"1960s", notes:"", confidence:"medium"},
+        {id:"e3074", transmission_id:"003", start_time:"", end_time:"", type:"narration", title:"FILMWAYS PRESENTATION (Zsa Zsa Gabor)", primary_credit:"Zsa Zsa Gabor", source:"TV tag", year:"1960s", notes:"", confidence:"medium"},
+      ]
+    };
+
+
+    const qs = (sel, root=document) => root.querySelector(sel);
+    const qsa = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+    function pad2(n){ return String(n).padStart(2,'0'); }
+
+    function makeSessionId(){
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let out = '';
+      for(let i=0;i<8;i++){ out += chars[Math.floor(Math.random()*chars.length)]; }
+      return out;
+    }
+
+    class App {
+      constructor(){
+        this.data = D;
+        this.appEl = qs('#app');
+
+        this.overlay = qs('#session-overlay');
+        this.aliasInput = qs('#alias-input');
+        this.enterBtn = qs('#enter-btn');
+        this.sessionIndicator = qs('#session-indicator');
+
+        this.navTrans = qs('#nav-transmissions');
+        this.navInfo = qs('#nav-info');
+
+        this.session = {
+          alias: sessionStorage.getItem('wlsn_alias') || '',
+          id: sessionStorage.getItem('wlsn_session_id') || '',
+          start: Number(sessionStorage.getItem('wlsn_session_start') || 0)
+        };
+
+        this.chatBots = [
+          {name:'djmoondust',location:'Portland, OR'},
+          {name:'tape_hound',location:'London, UK'},
+          {name:'freq_drift',location:'Tokyo, JP'},
+          {name:'vinyl_archive',location:'Melbourne, AU'},
+          {name:'signal_lost',location:'Brooklyn, NY'},
+          {name:'reel_to_reel',location:'Berlin, DE'}
+        ];
+
+        this.botMessages = [
+          {bot:1,text:"001: anyone else catch the dip right after the ident? feels like the deck grabbed.",reply:true},
+          {bot:3,text:"003 opens with a clean weather tag, but the noise floor feels off for an aircheck."},
+          {bot:0,text:"The WLSN ident shows up more than once, but never the same length twice."},
+          {bot:4,text:"02:18 in 001: that whistle again. quiet, same band.",reply:true},
+          {bot:2,text:"I tried matching the cereal spot in 003. close, not exact. maybe a different cut?"},
+          {bot:5,text:"Hard splice at 03:22 on 002, then it returns brighter. two passes?",reply:true},
+          {bot:1,text:"If it was rebroadcast, why keep the bleed? feels like the bleed is the point."},
+          {bot:3,text:"Tape box handwriting switches formats mid-run. month/day once, then day.month."},
+          {bot:0,text:"The ident consonants smear like it was played off a speaker into a mic.",reply:true},
+          {bot:4,text:"Some tracks run a hair fast. could be speed drift, could be source.",reply:true},
+          {bot:2,text:"Anyone recognize the four note chime? feels like a station kit."},
+          {bot:5,text:"I keep hearing room tone under the music. like another space underneath.",reply:true},
+          {bot:1,text:"003: the word 'network' pops once, then disappears. too clean to be accidental."},
+          {bot:3,text:"That word sits on top of the hiss, not inside it."},
+          {bot:0,text:"Reminder: tag artifacts separately from tracks. this is not a playlist.",reply:true},
+          {bot:4,text:"Ghost note under the tone in 001. could be a second deck running.",reply:true}
+        ];
+
+        this.slides = [
+          {src:"images/wlsn-01.jpg",caption:"WLSN ARCHIVE PHOTO | REEL BOX FRAGMENT"}
+        ];
+
+        this._uptimeTimer = null;
+        this._chatTimer = null;
+        this._slideTimer = null;
+        this._audio = null;
+      }
+
+      init(){
+        this.bindSessionGate();
+        this.bindRouter();
+        this.ensureSession();
+        this.renderRoute();
+        this.startUptime();
+      }
+
+      bindSessionGate(){
+        const submit = () => {
+          const alias = (this.aliasInput.value || '').trim().toUpperCase();
+          if(!alias){
+            this.aliasInput.focus();
+            return;
+          }
+          this.session.alias = alias.toUpperCase();
+          sessionStorage.setItem('wlsn_alias', this.session.alias);
+
+          if(!this.session.id){
+            this.session.id = makeSessionId();
+            sessionStorage.setItem('wlsn_session_id', this.session.id);
+          }
+
+          if(!this.session.start){
+            this.session.start = Date.now();
+            sessionStorage.setItem('wlsn_session_start', String(this.session.start));
+          }
+
+          this.hideOverlay();
+          this.updateSessionPanel();
+        };
+
+        this.enterBtn.addEventListener('click', submit);
+        this.aliasInput.addEventListener('keydown', (e) => {
+          if(e.key === 'Enter') submit();
+        });
+      }
+
+      ensureSession(){
+        if(this.session.alias && this.session.start){
+          if(!this.session.id){
+            this.session.id = makeSessionId();
+            sessionStorage.setItem('wlsn_session_id', this.session.id);
+          }
+          this.hideOverlay();
+          this.updateSessionPanel();
+          return;
+        }
+        this.showOverlay();
+        this.updateSessionPanel(true);
+        setTimeout(() => this.aliasInput.focus(), 60);
+      }
+
+      showOverlay(){
+        this.overlay.classList.add('active');
+        this.overlay.setAttribute('aria-hidden','false');
+      }
+
+      hideOverlay(){
+        this.overlay.classList.remove('active');
+        this.overlay.setAttribute('aria-hidden','true');
+      }
+
+      startUptime(){
+        if(this._uptimeTimer) clearInterval(this._uptimeTimer);
+        this._uptimeTimer = setInterval(() => this.updateSessionPanel(), 1000);
+      }
+
+      updateSessionPanel(isLocked=false){
+        const alias = this.session.alias || 'UNIDENTIFIED';
+        const id = this.session.id || '--------';
+
+        let uptime = '00:00:00';
+        if(this.session.start){
+          const s = Math.max(0, Math.floor((Date.now() - this.session.start) / 1000));
+          const h = Math.floor(s / 3600);
+          const m = Math.floor((s % 3600) / 60);
+          const sec = s % 60;
+          uptime = `${pad2(h)}:${pad2(m)}:${pad2(sec)}`;
+        }
+
+        this.sessionIndicator.innerHTML = isLocked
+          ? `ACCESS LOCKED | <b>IDENTIFICATION REQUIRED</b>`
+          : `LOGGED AS <b>${alias}</b> | SESSION <b>${id}</b> | UPTIME <b>${uptime}</b>`;
+      }
+
+      bindRouter(){
+        window.addEventListener('hashchange', () => this.renderRoute());
+
+        const go = (hash) => {
+          if(location.hash !== hash) location.hash = hash;
+          else this.renderRoute();
+        };
+
+        this.navTrans.addEventListener('click', (e) => {
+          e.preventDefault();
+          go('#transmissions');
+        });
+        this.navInfo.addEventListener('click', (e) => {
+          e.preventDefault();
+          go('#info');
+        });
+      }
+
+      setActiveNav(route){
+        this.navTrans.classList.remove('active');
+        this.navInfo.classList.remove('active');
+        if(route === 'info') this.navInfo.classList.add('active');
+        else this.navTrans.classList.add('active');
+      }
+
+      renderRoute(){
+        const hash = (location.hash || '#transmissions').replace(/^#/, '');
+        const parts = hash.split('/').filter(Boolean);
+
+        this.stopTimers();
+
+        this.closeElementModal();
+
+        if(parts[0] === 'info'){
+          this.setActiveNav('info');
+          this.renderInfo();
+          return;
+        }
+
+        this.setActiveNav('transmissions');
+
+        if(parts[0] === 'transmissions' && parts[1]){
+          this.renderTransmission(parts[1]);
+          return;
+        }
+
+        this.renderArchive();
+      }
+
+      stopTimers(){
+        if(this._chatTimer) clearInterval(this._chatTimer);
+        if(this._slideTimer) clearInterval(this._slideTimer);
+        this._chatTimer = null;
+        this._slideTimer = null;
+
+        if(this._audio){
+          try { this._audio.pause(); } catch(e) {}
+          this._audio = null;
+        }
+
+        this.closeElementModal();
+      }
+
+      formatTimeRange(a,b){
+        const s = (a || "").trim();
+        const e = (b || "").trim();
+        if(s && e) return `${s} to ${e}`;
+        if(s) return s;
+        if(e) return e;
+        return "";
+      }
+
+      buildElementTip(el){
+        const parts = [];
+        const src = (el.source || "").trim();
+        const notes = (el.notes || "").trim();
+        if(src) parts.push(`SOURCE: ${src}`);
+        if(notes) parts.push(`NOTES: ${notes}`);
+        return parts.join("\n");
+      }
+
+      openElementModal(el){
+        const modal = document.getElementById('element-modal');
+        const grid = document.getElementById('element-grid');
+        const closeBtn = document.getElementById('element-close');
+        if(!modal || !grid || !closeBtn) return;
+
+        const safe = (v) => {
+          const s = (v === null || v === undefined) ? '' : String(v);
+          return s.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        };
+
+        const timeRange = this.formatTimeRange(el.start_time, el.end_time);
+        const fields = [
+          ['TITLE', el.title || ''],
+          ['TIME', timeRange || ''],
+          ['TYPE', el.type || ''],
+          ['PRIMARY CREDIT', el.primary_credit || ''],
+          ['YEAR', el.year || ''],
+          ['CONFIDENCE', (el.confidence || '').toUpperCase()],
+          ['SOURCE', el.source || ''],
+          ['NOTES', el.notes || ''],
+          ['ELEMENT ID', el.id || '']
+        ];
+
+        grid.innerHTML = fields.map(([k,v]) => {
+          const wide = (k === 'NOTES' || k === 'SOURCE') ? ' element-wide' : '';
+          return `<div class="element-field${wide}">
+                    <div class="element-label">${safe(k)}</div>
+                    <div class="element-value">${safe(v) || '-'}</div>
+                  </div>`;
+        }).join('');
+
+        const close = () => this.closeElementModal();
+        closeBtn.onclick = close;
+        modal.onclick = (e) => { if(e.target === modal) close(); };
+
+        modal.classList.add('active');
+        modal.setAttribute('aria-hidden','false');
+      }
+
+      closeElementModal(){
+        const modal = document.getElementById('element-modal');
+        if(!modal) return;
+        modal.classList.remove('active');
+        modal.setAttribute('aria-hidden','true');
+      }
+
+      renderArchive(){
+        const ordered = [...this.data.transmissions].sort((a,b) => String(a.id).localeCompare(String(b.id)));
+
+        this.appEl.innerHTML = `
+          <section class="feature">
+            <div class="feature-title">Broadcast Archive</div>
+            <p>Recovered WLSN transmissions. Open a signal to access audio playback, an ordered artifact list, and supporting notes.</p>
+          </section>
+
+          <div class="grid" id="tx-grid"></div>
+`;
+
+        const grid = qs('#tx-grid');
+        grid.innerHTML = ordered.map(t => `
+          <div class="card" data-id="${t.id}">
+            <div class="card-id">TRANSMISSION ${t.id}</div>
+            <div class="card-title">${t.title}</div>
+            <div class="card-date">${t.dateFormatted}</div>
+            <div class="card-desc">${t.description}</div>
+          </div>
+        `).join('');
+
+        qsa('.card', grid).forEach(card => {
+          card.addEventListener('click', () => {
+            location.hash = `#transmissions/${card.getAttribute('data-id')}`;
+          });
+        });
+      }
+
+      renderTransmission(id){
+        const tx = this.data.transmissions.find(t => t.id === id);
+        if(!tx){
+          this.appEl.innerHTML = `<a class="back-link" href="#transmissions">Back</a><div class="intro"><h1>Transmission Not Found</h1><p>No record for TRANSMISSION ${id}.</p></div>`;
+          return;
+        }
+
+        const elements = this.data.elements.filter(e => e.transmission_id === tx.id);
+
+        this.appEl.innerHTML = `
+          <a class="back-link" href="#transmissions">Back to Archive</a>
+
+          <div class="transmission-header">
+            <div class="transmission-id">TRANSMISSION ${tx.id}</div>
+            <div class="transmission-title">${tx.title}</div>
+            <div class="transmission-date">RECORDED: ${tx.dateFormatted}</div>
+            <div></div>
+            <div style="opacity:0.82;">${tx.notes}</div>
+          </div>
+
+          ${tx.audioUrl ? this.renderAudioPlayer(tx.audioUrl, tx.title) : `<div class="section"><div class="section-title">Audio</div><p style="opacity:0.75;">Audio file not yet linked.</p></div>`}
+
+          <div class="section">
+            <div class="section-title">Artifacts</div>
+
+            <div class="transmission-filters">
+              <input id="filter-q" type="text" placeholder="Search title, credit, notes" autocomplete="off" />
+              <select id="filter-type">
+                <option value="">All types</option>
+                ${Array.from(new Set(elements.map(e => e.type))).sort().map(t => `<option value="${t}">${t}</option>`).join('')}
+              </select>
+            </div>
+
+            <table class="breakdown-table">
+              <thead>
+                <tr>
+                  <th>TIME</th>
+                  <th>TYPE</th>
+                  <th>TITLE</th>
+                  <th>ARTIST / BRAND</th>
+                  <th>YEAR</th>
+                  <th>CONF</th>
+                </tr>
+              </thead>
+              <tbody id="elements-body"></tbody>
+            </table>
+          </div>
+        `;
+
+        const body = qs('#elements-body');
+        const safeYear = (y) => {
+          const s = (y === undefined || y === null) ? "" : String(y).trim();
+          if (!s || s.toLowerCase() === "unknown") return "1960s";
+          return s;
+        };
+
+        const renderRows = () => {
+          const q = (qs('#filter-q').value || '').trim().toLowerCase();
+          const type = qs('#filter-type').value;
+
+          const rows = elements.filter(e => {
+            if(type && e.type !== type) return false;
+            if(!q) return true;
+            const blob = `${e.title} ${e.primary_credit} ${e.notes || ''} ${e.source || ''}`.toLowerCase();
+            return blob.includes(q);
+          });
+
+          body.innerHTML = rows.map(e => {
+            const confClass = e.confidence === 'high' ? 'confidence-high' : (e.confidence === 'medium' ? 'confidence-medium' : 'confidence-low');
+            const confLabel = e.confidence === 'medium' ? 'med' : (e.confidence || '');
+            const timeRange = this.formatTimeRange(e.start_time, e.end_time);
+            const tip = this.buildElementTip(e);
+            const tipBadge = "";
+            return `<tr data-eid="${e.id}">
+                <td>${timeRange}</td>
+                <td><span class="type-badge">${String(e.type||"").toUpperCase()}</span></td>
+                <td><span class="element-link">${e.title}</span></td>
+                <td>${e.primary_credit || ""}</td>
+                <td>${safeYear(e.year)}</td>
+                <td class="${confClass}">${String(confLabel).toLowerCase()}</td>
+              </tr>`;
+          }).join('');
+
+          if(rows.length === 0){
+            body.innerHTML = `<tr><td colspan="6" style="opacity:0.7;">No matches.</td></tr>`;
+          }
+        };
+
+        qs('#filter-q').addEventListener('input', renderRows);
+        qs('#filter-type').addEventListener('change', renderRows);
+        renderRows();
+
+        if(this._artifactClickHandler){
+          body.removeEventListener('click', this._artifactClickHandler);
+        }
+        this._artifactClickHandler = (ev) => {
+          const tr = ev.target && ev.target.closest ? ev.target.closest('tr[data-eid]') : null;
+          if(!tr) return;
+          const eid = tr.getAttribute('data-eid');
+          const el = elements.find(x => x.id === eid);
+          if(el) this.openElementModal(el);
+        };
+        body.addEventListener('click', this._artifactClickHandler);
+      }
+
+      renderAudioPlayer(url, title){
+        const safeTitle = title.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+        setTimeout(() => this.bindAudio(url), 0);
+
+        return `
+          <div class="audio-player" id="audio-player">
+            <div class="section-title">Audio</div>
+            <div class="audio-controls">
+              <button class="play-btn" id="play-btn" type="button">▶</button>
+              <div class="time-display" id="time-display">00:00 / 00:00</div>
+              <div class="timeline" id="timeline"><div class="timeline-progress" id="timeline-progress"></div><div class="timeline-handle" id="timeline-handle" style="left:0%"></div></div>
+              <div class="volume-control">
+                <div class="volume-icon">VOL</div>
+                <div class="volume-slider" id="vol"><div class="volume-level" id="vol-level"></div></div>
+              </div>
+            </div>
+            <div class="track-info">${safeTitle} | ${url}</div>
+          </div>
+        `;
+      }
+
+      bindAudio(url){
+        const playBtn = qs('#play-btn');
+        const timeEl = qs('#time-display');
+        const timeline = qs('#timeline');
+        const prog = qs('#timeline-progress');
+        const handle = qs('#timeline-handle');
+        const vol = qs('#vol');
+        const volLevel = qs('#vol-level');
+
+        if(!playBtn || !timeline || !vol) return;
+
+        const audio = new Audio(url);
+        audio.preload = 'metadata';
+        audio.volume = 1;
+        this._audio = audio;
+
+        const fmt = (t) => {
+          if(!isFinite(t)) return '00:00';
+          const m = Math.floor(t / 60);
+          const s = Math.floor(t % 60);
+          return `${pad2(m)}:${pad2(s)}`;
+        };
+
+        const sync = () => {
+          const cur = audio.currentTime || 0;
+          const dur = audio.duration || 0;
+          timeEl.textContent = `${fmt(cur)} / ${fmt(dur)}`;
+
+          if(dur > 0){
+            const p = Math.max(0, Math.min(1, cur / dur));
+            const pct = (p * 100);
+            prog.style.width = `${pct}%`;
+            handle.style.left = `${pct}%`;
+          }
+        };
+
+        audio.addEventListener('timeupdate', sync);
+        audio.addEventListener('loadedmetadata', sync);
+        audio.addEventListener('ended', () => {
+          playBtn.textContent = '▶';
+        });
+
+        audio.addEventListener('error', () => {
+          playBtn.disabled = true;
+          timeEl.textContent = 'AUDIO NOT FOUND';
+        });
+
+        playBtn.addEventListener('click', () => {
+          if(audio.paused){
+            audio.play();
+            playBtn.textContent = '❚❚';
+          } else {
+            audio.pause();
+            playBtn.textContent = '▶';
+          }
+        });
+
+        const seek = (clientX) => {
+          const r = timeline.getBoundingClientRect();
+          const p = (clientX - r.left) / r.width;
+          const clamped = Math.max(0, Math.min(1, p));
+          if(audio.duration){
+            audio.currentTime = clamped * audio.duration;
+          }
+        };
+
+        let isScrubbing = false;
+
+        const scrubTo = (clientX) => seek(clientX);
+
+        timeline.addEventListener('mousedown', (e) => {
+          isScrubbing = true;
+          scrubTo(e.clientX);
+        });
+
+        window.addEventListener('mousemove', (e) => {
+          if(!isScrubbing) return;
+          scrubTo(e.clientX);
+        });
+
+        window.addEventListener('mouseup', () => { isScrubbing = false; });
+
+        timeline.addEventListener('touchstart', (e) => {
+          isScrubbing = true;
+          if(e.touches && e.touches[0]) scrubTo(e.touches[0].clientX);
+        }, {passive:false});
+
+        window.addEventListener('touchmove', (e) => {
+          if(!isScrubbing) return;
+          if(e.touches && e.touches[0]) scrubTo(e.touches[0].clientX);
+          e.preventDefault();
+        }, {passive:false});
+
+        window.addEventListener('touchend', () => { isScrubbing = false; });
+
+
+        const setVol = (clientX) => {
+          const r = vol.getBoundingClientRect();
+          const p = (clientX - r.left) / r.width;
+          const clamped = Math.max(0, Math.min(1, p));
+          audio.volume = clamped;
+          volLevel.style.width = `${clamped * 100}%`;
+        };
+
+        vol.addEventListener('mousedown', (e) => setVol(e.clientX));
+        vol.addEventListener('touchstart', (e) => {
+          if(e.touches && e.touches[0]) setVol(e.touches[0].clientX);
+        }, {passive:true});
+
+        sync();
+      }
+
+      renderInfo(){
+        this.appEl.innerHTML = `
+          <section class=\"intro\">
+            <h1>Info</h1>
+            <p>Recovered discussion, archive images, and update channels for newly linked transmissions.</p>
+          </section>
+
+          <div class=\"info-shell\">
+            <div class=\"info-grid\">
+              <div class=\"info-left\">
+                <div class=\"panel full-height\">
+                  <div class=\"section-title\">DISCUSSION</div>
+                  <div class=\"chat-container\">
+                    <div class=\"chat-log\" id=\"chat-log\"></div>
+                  </div>
+
+                  <div class=\"chat-input-area\">
+                    <input id=\"chat-input\" type=\"text\" placeholder=\"ENTER NOTE...\" autocomplete=\"off\" />
+                    <button class=\"btn\" id=\"chat-send\" type=\"button\">SEND</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class=\"info-right\">
+                <div class=\"panel\">
+                  <div class=\"section-title\">ARCHIVE IMAGES</div>
+                  <div class=\"slideshow-stage\" id=\"stage\"><div class=\"slideshow-caption\" id=\"stage-caption\"></div></div>
+                </div>
+
+                <div class=\"panel full-height\">
+                  <div class=\"section-title\">STAY UPDATED</div>
+                  <div class=\"stay-grid\">
+                    <div>
+                      <input id=\"email\" type=\"email\" placeholder=\"EMAIL\" autocomplete=\"off\" />
+                      <button class=\"btn\" id=\"sub\" type=\"button\" style=\"width:100%;\">SUBSCRIBE</button>
+                      <div class=\"message\" id=\"msg\"></div>
+                    </div>
+
+                    <div class=\"rss-block\">
+                      <div style=\"opacity:0.82;margin:0 0 10px;\">Podcast feed (RSS)</div>
+                      <input id=\"rss-url\" class=\"panel-input\" type=\"text\" value=\"https://wlsn.space/feed.xml\" readonly />
+                      <button class=\"btn\" id=\"copy-rss\" type=\"button\" style=\"width:100%;\">COPY FEED URL</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        this.bindChat();
+        this.bindNewsletter();
+        this.bindSlideshow();
+
+        const copyBtn = qs('#copy-rss');
+        const rssInput = qs('#rss-url');
+        if(copyBtn && rssInput){
+          copyBtn.addEventListener('click', async () => {
+            try{
+              await navigator.clipboard.writeText(rssInput.value);
+              const old = copyBtn.textContent;
+              copyBtn.textContent = 'COPIED';
+              setTimeout(() => copyBtn.textContent = old, 900);
+            }catch(e){
+              rssInput.focus();
+              rssInput.select();
+            }
+          });
+        }
+      }
+
+      bindChat(){
+        const log = qs('#chat-log');
+        const input = qs('#chat-input');
+        const send = qs('#chat-send');
+        if(!log || !input || !send) return;
+
+        const pushMsg = (who, text, meta) => {
+          const ts = new Date();
+          const stamp = `${pad2(ts.getHours())}:${pad2(ts.getMinutes())}`;
+          const extra = meta ? `<span class="chat-location">${meta}</span>` : '';
+          const cls = who === 'USER' ? 'chat-user' : 'chat-bot';
+          const name = who === 'USER' ? (this.session.alias || 'UNIDENTIFIED') : who;
+
+          const el = document.createElement('div');
+          el.className = 'chat-msg';
+          el.innerHTML = `
+            <span class="chat-timestamp">${stamp}</span>
+            <span class="${cls}">${name}</span>${extra}
+            <div style="opacity:0.86; margin-left:42px;">${text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+          `;
+          log.appendChild(el);
+          log.parentElement.scrollTop = log.parentElement.scrollHeight;
+        };
+
+        const postUser = () => {
+          const t = (input.value || '').trim();
+          if(!t) return;
+          input.value = '';
+          pushMsg('USER', t);
+        };
+
+        send.addEventListener('click', postUser);
+        input.addEventListener('keydown', (e) => {
+          if(e.key === 'Enter') postUser();
+        });
+
+        // Seed a few messages
+        for(let i=0;i<6;i++){
+          const m = this.botMessages[i];
+          const b = this.chatBots[m.bot];
+          pushMsg(b.name, m.text, b.location);
+        }
+
+        let idx = 6;
+        this._chatTimer = setInterval(() => {
+          if(idx >= this.botMessages.length) return;
+          const m = this.botMessages[idx++];
+          const b = this.chatBots[m.bot];
+          pushMsg(b.name, m.text, b.location);
+        }, 3800);
+        const copyBtn = qs('#copy-rss');
+        if(copyBtn){
+          copyBtn.addEventListener('click', async () => {
+            const rss = qs('#rss-url');
+            if(!rss) return;
+            try{
+              rss.select();
+              rss.setSelectionRange(0, 99999);
+              document.execCommand('copy');
+              copyBtn.textContent = 'COPIED';
+              setTimeout(() => copyBtn.textContent = 'COPY FEED URL', 1200);
+            }catch(e){
+              // no-op
+            }
+          });
+        }
+
+      }
+
+      bindNewsletter(){
+        const email = qs('#email');
+        const sub = qs('#sub');
+        const msg = qs('#msg');
+        if(!email || !sub || !msg) return;
+
+        const show = (text, ok=true) => {
+          msg.className = 'message ' + (ok ? 'success' : 'error');
+          msg.style.display = 'block';
+          msg.textContent = text;
+        };
+
+        sub.addEventListener('click', () => {
+          const v = (email.value || '').trim();
+          if(!v || !v.includes('@')){
+            show('INVALID EMAIL', false);
+            return;
+          }
+          show('RECEIVED. INDEXING PENDING.', true);
+          email.value = '';
+        });
+      }
+
+      bindSlideshow(){
+        const stage = qs('#stage');
+        const caption = qs('#stage-caption');
+        if(!stage) return;
+
+        stage.innerHTML = '';
+
+        const first = (this.slides && this.slides[0]) ? this.slides[0] : null;
+        if(!first || !first.src){
+          stage.innerHTML = `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0.75;letter-spacing:2px;font-size:10px;">NO IMAGES LINKED YET</div>`;
+          if(caption) caption.textContent = '';
+          return;
+        }
+
+        const img = document.createElement('img');
+        img.src = first.src;
+        img.alt = first.caption || 'WLSN image';
+        img.classList.add('active');
+        img.addEventListener('error', () => {
+          stage.innerHTML = `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0.75;letter-spacing:2px;font-size:10px;">NO IMAGES LINKED YET</div>`;
+          if(caption) caption.textContent = '';
+        });
+        stage.appendChild(img);
+
+        if(caption) caption.textContent = first.caption || '';
+      }
+
+      loadToPlayer(url, title){
+        const player = document.getElementById('persistent-player');
+        const audio = document.getElementById('pp-audio');
+        const titleEl = document.getElementById('pp-title');
+        if(!player || !audio || !titleEl) return;
+
+        if(!url){
+          titleEl.textContent = 'None';
+          audio.removeAttribute('src');
+          audio.load();
+          player.classList.remove('active');
+          player.setAttribute('aria-hidden','true');
+          return;
+        }
+
+        titleEl.textContent = title || 'Untitled';
+        audio.src = url;
+        player.classList.add('active');
+        player.setAttribute('aria-hidden','false');
+
+        audio.play().catch(()=>{});
+      }
+}
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const app = new App();
+      app.init();
+    });
+
+document.addEventListener('click', (e) => {
+  const t = e.target;
+  if(t && t.id === 'pp-hide'){
+    const player = document.getElementById('persistent-player');
+    if(player){
+      player.classList.remove('active');
+      player.setAttribute('aria-hidden','true');
+    }
+  }
+});
+</script>
+</body>
+</html>
